@@ -1,34 +1,40 @@
 ///////////////////////////////////////////////////////////
-// This module defines a 4-bit ALU possible of performing
-// ADD, SUB, NAND, and XOR. It instantiates an instance
-// of addsub_4bit.v to perform ADD and SUB.
-// Author: Hernan Carranza
+// This module is the top-level file for our WISC-F23 
+// Single Cycle Processor. It performs several logic 
+// instructions: ADD, PADDSB, SUB, XOR, SLL, SRA, ROR, RED
+// Authors: Hernan Carranza, Gabriel Ruggie
 ///////////////////////////////////////////////////////////
 module ALU(ALU_out, Error, ALU_In1, ALU_In2, Opcode);
-  input [1:0] Opcode;			// determines operation
-  input [3:0] ALU_In1, ALU_In2; // Inputs to op on
-  output reg [3:0] ALU_out;		// Result of op
-  output Error;					// indicates overflow
+  input [2:0] Opcode;			       // 3-bit opcode
+  input [15:0] ALU_In1, ALU_In2; // Inputs to operate on
+  output reg [15:0] ALU_out;		 // Result of op
+  output Error;					         // indicates overflow
   
   // define params for opcode code legibility
-  parameter ADD = 2'b00;
-  parameter SUB = 2'b01;
-  parameter NAND = 2'b10;
-  parameter XOR = 2'b11;
-  
+  parameter ADD = 3'b000;
+  parameter SUB = 3'b001;
+  parameter XOR = 3'b010;
+  parameter RED = 3'b011;
+  parameter SLL = 3'b100;
+  parameter SRA = 3'b101;
+  parameter ROR = 3'b110;
+  parameter PADDSB = 3'b111;
+
   // define local module signals
-  wire [3:0] Sum;	// result of add/sub
   
-  // instantiate 4-bit RCA for add/sub
-  addsub_4bit RCA(.A(ALU_In1),.B(ALU_In2),.sub(Opcode[0]),.Sum,.Ovfl(Error));
+  // instantiate needed modules
   
   // case selection depending on opcode
   always @* begin
 	case (Opcode)
 	    ADD : ALU_out = Sum;
 	    SUB : ALU_out = Sum;
-	   NAND : ALU_out = ~(ALU_In1 & ALU_In2);
 	    XOR : ALU_out = ALU_In1 ^ ALU_In2;
+      RED : ;
+      SLL : ;
+      SRA : ;
+      ROR : ;
+      PADDSB : ;
 	default : ALU_out = Sum;
 	endcase
   end
