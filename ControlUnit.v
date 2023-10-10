@@ -1,4 +1,4 @@
-module (
+module ControlUnit(
 
     input [3:0] opcode,
     output dst_reg, alu_src, mem_read, mem_write, mem_to_reg, write_reg, branch_en, branch, pcs, lower_half, upper_half;
