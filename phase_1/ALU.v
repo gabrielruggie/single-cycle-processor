@@ -4,11 +4,18 @@
 // instructions: ADD, PADDSB, SUB, XOR, SLL, SRA, ROR, RED
 // Authors: Hernan Carranza, Gabriel Ruggie
 ///////////////////////////////////////////////////////////
-module ALU(ALU_out, Error, ALU_In1, ALU_In2, Opcode);
-  input [2:0] Opcode;			       // 3-bit opcode
-  input [15:0] ALU_In1, ALU_In2; // Inputs to operate on
-  output reg [15:0] ALU_out;		 // Result of op
-  output Error;					         // indicates overflow
+module ALU(
+  
+  input [3:0] Opcode,
+  input [15:0] ALU_In1, ALU_In2,
+  output [2:0] flags,
+  output [2:0] enable,
+  output [15:0] ALU_out, 
+
+);
+
+  wire [15:0] sum, shft_out, difference, paddsb, exor, red;
+  wire ovflow0, ovflow1;
   
   // define params for opcode code legibility
   parameter ADD = 3'b000;
@@ -20,23 +27,79 @@ module ALU(ALU_out, Error, ALU_In1, ALU_In2, Opcode);
   parameter ROR = 3'b110;
   parameter PADDSB = 3'b111;
 
+  reg [15:0] _alu_out;
+  reg [2:0] _flags;
+  reg _enable;
+
   // define local module signals
-  
-  // instantiate needed modules
-  
+  cla_16bit ADDER ( .A(ALU_In1), .B(ALU_In2), .Sum(sum), .Ovfl(ovflow0), .sub(1'b0) );
+  cla_16bit SUBER ( .A(ALU_In1), .B(ALU_In2), .Sum(difference), .Ovfl(ovflow1), .sub(1'b1) );
+  // RED Unit
+  cla_paddsb_16bit PDDSB ( .A(ALU_In1), .B(ALU_In2), .Sum(paddsb), .sub(1'b0) );
+  // Shifter
+
   // case selection depending on opcode
-  always @* begin
-	case (Opcode)
-	    ADD : ALU_out = Sum;
-	    SUB : ALU_out = Sum;
-	    XOR : ALU_out = ALU_In1 ^ ALU_In2;
-      RED : ;
-      SLL : ;
-      SRA : ;
-      ROR : ;
-      PADDSB : ;
-	default : ALU_out = Sum;
-	endcase
+  always @(*) begin
+    
+    case (Opcode) 
+
+      4'h0: begin
+            assign _alu_out = sum;
+            assign _enable = 3'b111;
+
+            assign _flags[0] = ovflow0 ? 1'b1 : 1'b0;
+            assign _flags[2] = sum[15] ? 1'b1 : 1'b0;
+      end
+      4'h1: begin
+            assign _alu_out = difference;
+            assign _enable = 3'b111;
+
+            assign _flags[0] = ovflow1 ? 1'b1 : 1'b0;
+            assign _flags[2] = difference[15] ? 1'b1 : 1'b0;
+      end
+      4'h2: begin
+            assign _alu_out = exor;
+            assign _enable = 3'b010;
+      end
+      4'h3: begin
+            assign _alu_out = red;
+            assign _enable = 3'b010;
+      end
+      4'h4: begin
+            assign _alu_out = shft_out;
+            assign _enable = 3'b010;
+      end
+      4'h5: begin
+            assign _alu_out = shft_out;
+            assign _enable = 3'b010;
+      end
+      4'h6: begin
+            assign _alu_out = shft_out;
+            assign _enable = 3'b010;
+      end
+      4'h7: begin
+            assign _alu_out = paddsb;
+            assign _enable = 3'b010;
+      end
+      4'h8: begin
+            assign _alu_out = sum;
+            assign _enable = 3'b000;
+      end
+      4'h9: begin
+            assign _alu_out = sum;
+            assign _enable = 3'b000;
+      end
+      default: begin
+            assign _alu_out = ALU_In1 | ALU_In2;
+            assign _enable = 3'b000;
+      end
+      
+    endcase
+
   end
+
+  assign enable = _enable;
+  assign ALU_out = _alu_out;
+  assign flags = (_alu_out == 16'h0000) ? (_flags | 3'b010) : _flags; // Assign bit 1 if output is equal to zero
 
 endmodule
