@@ -36,7 +36,7 @@ module CPU (
     InstructionMemory im ( .data_in(imemory_in), .data_out(imemory_out), .addr(pc), .enable(!halt), .wr(im_wr), .clk(clk), .rst(!rst_n) );
 
     // Flag Register /
-    FlagRegister fr ( .clk(clk), .rst(!rst_n), .enable(flag_en), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en), .ALU_out(alu_out) );
+    FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en), .ALU_out(alu_out) );
 
     // Register File //
     RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
