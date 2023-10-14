@@ -8,9 +8,9 @@ module ALU(
   
   input [3:0] Opcode,
   input [15:0] ALU_In1, ALU_In2,
-  output [2:0] flags,
-  output [2:0] enable,
-  output [15:0] ALU_out, 
+  output reg [2:0] flags,
+  output reg [2:0] enable,
+  output reg [15:0] ALU_out, 
 
 );
 

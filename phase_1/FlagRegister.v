@@ -2,7 +2,7 @@ module FlagRegister (
 
     input clk, rst,
     input [2:0] flag_prev, enable,
-    output [2:0] flag_curr,
+    output reg [2:0] flag_curr,
 
 );
 

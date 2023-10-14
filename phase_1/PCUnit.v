@@ -24,7 +24,7 @@ module PCUnit (
 
             3'b000: target_addr = flags[1] ? not_taken : taken;                                 // Case when: Z=0
             3'b001: target_addr = flags[1] ? taken : not_taken;                                 // Case when: Z=1
-            3'b010: target_addr = flags[1] && flags[2] : not_taken : taken;                     // Case when: N=0 and Z=0
+            3'b010: target_addr = flags[1] && flags[2] ? not_taken : taken;                     // Case when: N=0 and Z=0
             3'b011: target_addr = flags[2] ? taken : not_taken;                                 // Case when: N=1
             3'b100: target_addr = flags[1] || (!flags[1] && !flags[2]) ? taken : not_taken;     // Case when: Z=1 or N=0 and Z=0
             3'b101: target_addr = flags[1] && flags[2] ? taken : not_taken;                     // Case when: N=1 or Z=1
