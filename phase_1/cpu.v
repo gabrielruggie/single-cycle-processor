@@ -9,7 +9,7 @@ module CPU (
 
     // Module Inputs //
     wire im_wr, dm_wr, dm_en;
-    wire [15:0] alu_in, data_memory_in, imemory_in;
+    wire [15:0] alu_in1, alu_in2, data_memory_in, imemory_in;
     wire [2:0] flag_prev, flag_curr, flag_en;
     wire [3:0] rs, rt, rd, dest_reg;
 
@@ -36,13 +36,13 @@ module CPU (
     InstructionMemory im ( .data_in(imemory_in), .data_out(imemory_out), .addr(pc), .enable(!halt), .wr(im_wr), .clk(clk), .rst(!rst_n) );
 
     // Flag Register /
-    FlagRegister fr ( .clk(clk), .rst(!rst_n), .enable(flag_en), .flag_prev(flag_prev), .flag_curr(flag_curr) );
+    FlagRegister fr ( .clk(clk), .rst(!rst_n), .enable(flag_en), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en), .ALU_out(alu_out) );
 
     // Register File //
     RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
 
     // ALU //
-
+    ALU alu ( .Opcode(imemory_out[15:12], .ALU_In1(alu_in1), .ALU_In2(alu_in2), .flags(flags), .enable(flag_en)) );
     // Data Memory
     DataMemory dm ( .data_in(data_memory_in), .data_out(data_memory_out), .addr(alu_out), .enable(dm_en), .wr(dm_wr), .clk(clk), .rst(!rst_n) );
 
@@ -62,7 +62,11 @@ module CPU (
 
     assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
 
-    // ALU Logic below
+    assign alu_in1 = (mem_read || mem_write) ? rf_out1 ? 
+                        load_higher ? 16'hFF00 & rf_out1 :
+                        load_higher ? 16'h00FF & rf_out1 : rf_out1;
+    
+    assign alu_in2 = alu_src ? imm : rf_out2;
 
 
 endmodule

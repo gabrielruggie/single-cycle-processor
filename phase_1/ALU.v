@@ -34,9 +34,9 @@ module ALU(
   // define local module signals
   cla_16bit ADDER ( .A(ALU_In1), .B(ALU_In2), .Sum(sum), .Ovfl(ovflow0), .sub(1'b0) );
   cla_16bit SUBER ( .A(ALU_In1), .B(ALU_In2), .Sum(difference), .Ovfl(ovflow1), .sub(1'b1) );
-  // RED Unit
+  red_16bit RED   (.Sum(red),.A(ALU_In1),.B(ALU_In2));
   cla_paddsb_16bit PDDSB ( .A(ALU_In1), .B(ALU_In2), .Sum(paddsb), .sub(1'b0) );
-  // Shifter
+  shifter Shift(.Shift_Out(shft_out),.Shift_In(ALU_In1),.Shift_Val([ALU_In2[3:0]]),.Mode(opcode[1:0]));
 
   // case selection depending on opcode
   always @(*) begin
