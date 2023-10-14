@@ -15,8 +15,8 @@ module PCUnit (
     assign sign_ext_imm = { {7{immediate[8]}}, immediate[8:0] };
     assign shift_left = sign_ext_imm << 1;
 
-    cla_16bit CLA0 ( .A(PC_in), .B(16'h0002), .sum(not_taken), .Ovfl(overflow), .sub(1'b0) );   // Calculates not_taken address
-    cla_16bit CLA1 ( .A(not_taken), .B(shift_left), .sum(taken), .Ovfl(overflow), .sub(1'b0) ); // Calculates taken address
+    cla_16bit CLA0 ( .A(PC_in), .B(16'h0002), .Sum(not_taken), .Ovfl(overflow), .sub(1'b0) );   // Calculates not_taken address
+    cla_16bit CLA1 ( .A(not_taken), .B(shift_left), .Sum(taken), .Ovfl(overflow), .sub(1'b0) ); // Calculates taken address
 
     always @(*) begin
 
