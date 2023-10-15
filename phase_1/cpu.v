@@ -24,7 +24,7 @@ module CPU (
     PCUnit pcunit ( .flags(imemory_out[11:9]), .condition_codes(flag_curr), .immediate(imemory_out[8:0]), .branch_en(branch_en), .PC_in(pc_reg_out), .PC_out(pc_unit_out));
 
     // PC Register //
-    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!hlt), .Q(pc_reg_out) );
+    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!halt), .Q(pc_reg_out) );
 
     // Control Unit //
     ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
