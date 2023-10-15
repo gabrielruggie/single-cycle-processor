@@ -37,6 +37,6 @@ module RegisterFile (
     Register register15 ( .clk(clk), .rst(rst), .D(dst_data), .write_en(w_decoder[15]), .read_en1(r_decoder1[15]), .read_en2(r_decoder2[15]), .bitline1(reg_data1), .bitline2(reg_data2) );
 
     assign src_data1 = ( src_reg1 == dst_reg && write_en ) ? dst_data : reg_data1;
-    assign src_data2 = ( src_reg2 == dst_data && write_en ) ? dst_data : reg_data2;
+    assign src_data2 = ( src_reg2 == dst_reg && write_en ) ? dst_data : reg_data2;
 
 endmodule
