@@ -26,7 +26,7 @@ module red_16bit(Sum,A,B);
   cla_4bit ab_lower(.Sum(sum_ab[3:0]),.P(P_ab_low),.G(G_ab_low),.A(A[11:8]),.B(B[3:0]),.Cin(1'b0));
   cla_4bit ab_upper(.Sum(sum_ab[7:4]),.P(),.G(G_ab_high),.A(A[15:12]),.B(B[7:4]),.Cin(G_ab_low));
   cla_4bit cd_lower(.Sum(sum_cd[3:0]),.P(P_cd_low),.G(G_cd_low),.A(B[11:8]),.B(B[3:0]),.Cin(sub));
-  cla_4bit cd_upper(.Sum(sum_cd[7:0]),.P(),.G(G_cd_high),.A(B[15:12]),.B(B[7:4]),.Cin(G_cd_low));
+  cla_4bit cd_upper(.Sum(sum_cd[7:4]),.P(),.G(G_cd_high),.A(B[15:12]),.B(B[7:4]),.Cin(G_cd_low));
   // second level of tree: perform (sum_ab + sum_cd) as 13 bit result
   cla_4bit cla1(.Sum(Sum[3:0]),.P(P_final_1),.G(G_final_1),.A(sum_ab[3:0]),.B(sum_cd[3:0]),.Cin(sub));
   cla_4bit cla2(.Sum(Sum[7:4]),.P(P_final_2),.G(G_final_2),.A(sum_ab[7:4]),.B(sum_cd[7:4]),.Cin(G_final_1));

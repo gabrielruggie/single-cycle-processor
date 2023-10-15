@@ -57,11 +57,13 @@ module InstructionMemory (data_out, data_in, addr, enable, wr, clk, rst);
          end
           
       end
+      
       else begin
          if (enable & wr) begin
 	        mem[addr[ADDR_WIDTH-1 :1]] = data_in[15:0];       // The actual write
          end
       end
+
    end
 
 

@@ -27,13 +27,13 @@ module CPU (
     PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!hlt), .Q(pc_reg_out) );
 
     // Control Unit //
-    ControlUnit cu ( .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
-                        .write_reg(write_reg), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
+    ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
+                        .write_reg(write_reg), .pcs(pcs), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
                         .hlt(halt) );
 
 
     // Instruction Memory //
-    InstructionMemory im ( .data_in(imemory_in), .data_out(imemory_out), .addr(pc), .enable(!halt), .wr(im_wr), .clk(clk), .rst(!rst_n) );
+    InstructionMemory im ( .data_out(imemory_out), .addr(pc_reg_out), .clk(clk), .rst(!rst_n), .data_in(16'h0000), .enable(1'b1), .wr(1'b0) );
 
     // Flag Register /
     FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );
@@ -42,7 +42,7 @@ module CPU (
     RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
 
     // ALU //
-    ALU alu ( .Opcode(imemory_out[15:12]), .ALU_In1(alu_in1), .ALU_In2(alu_in2), .flags(flags), .enable(flag_en));
+    ALU alu ( .Opcode(imemory_out[15:12]), .ALU_In1(alu_in1), .ALU_In2(alu_in2), .flags(flag_curr), .enable(flag_en), .ALU_out(alu_out));
     // Data Memory
     DataMemory dm ( .data_in(data_memory_in), .data_out(data_memory_out), .addr(alu_out), .enable(dm_en), .wr(dm_wr), .clk(clk), .rst(!rst_n) );
 
