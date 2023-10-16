@@ -62,9 +62,9 @@ module CPU (
 
     assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
 
-    assign alu_in1 =    ( mem_read || mem_write) ? rf_out1 & 16'hFFFE :  
-                        load_lower ? 16'hFF00 & rf_out1 :
-                        load_higher ? 16'h00FF & rf_out1 : rf_out1;
+    assign alu_in1 =    ( mem_read || mem_write) ? (rf_out1 & 16'hFFFE) :  
+                        load_lower ? (16'hFF00 & rf_out1) :
+                        load_higher ? (16'h00FF & rf_out1) : rf_out1;
     
     assign alu_in2 = alu_src ? imm : rf_out2;
 

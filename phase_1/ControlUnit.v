@@ -9,7 +9,7 @@ module ControlUnit(
     assign dst_reg = (opcode[3] == 1'b0 || opcode[3:1] == 3'b101) ? 1 : 0;
 
     // High for instructions: SLL, SRA, RORO, LW, SW, LLB, LHB
-    assign alu_src = (opcode[3:2] != 2'b00 || opcode[3:2] != 2'b11 || opcode != 4'b0111) ? 1 : 0;
+    assign alu_src = (opcode[3:2] != 2'b00 && opcode[3:2] != 2'b11 && opcode != 4'b0111) ? 1 : 0;
 
     // High for instructions: LW
     assign mem_read = (opcode == 4'b1000) ? 1 : 0;
