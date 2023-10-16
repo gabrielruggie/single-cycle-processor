@@ -23,7 +23,7 @@ module shifter(Shift_Out, Shift_In, Shift_Val, Mode);
 	  SLL : begin
 	    shift_1 = Shift_Val[0] ? {Shift_In[14:0], 1'b0} : Shift_In;
 		shift_2 = Shift_Val[1] ? {shift_1[13:0], 2'b00} : shift_1;
-		shift_3 = Shift_Val[2] ? {shift_2[11:0], 4'b000} : shift_2;
+		shift_3 = Shift_Val[2] ? {shift_2[11:0], 4'b0000} : shift_2;
 		shift_4 = Shift_Val[3] ? {shift_3[7:0], 8'b00000000} : shift_3;
 	  end
 	  SRA : begin
@@ -41,10 +41,10 @@ module shifter(Shift_Out, Shift_In, Shift_Val, Mode);
 	  end
 	  // default : no shift, assign intermediates to avoid X's
 	  default : begin
-		shift_1 = Shift_In;
-		shift_2 = Shift_In;
-		shift_3 = Shift_In;
-	    shift_4 = Shift_In;
+		shift_1 = 16'h0000;
+		shift_2 = 16'h0000;
+		shift_3 = 16'h0000;
+	    shift_4 = 16'h0000;
 	  end
 	endcase
   end
