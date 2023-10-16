@@ -13,7 +13,7 @@ module ALU(
 
 );
 
-  wire [15:0] sum, shft_out, difference, paddsb, exor, red;
+  wire [15:0] sum, shft_out, difference, paddsb, red;
   wire ovflow0, ovflow1;
 
   reg [15:0] alu_out_reg;
@@ -47,7 +47,7 @@ module ALU(
             flags_reg[2] = difference[15] ? 1'b1 : 1'b0;
       end
       4'h2: begin
-            alu_out_reg = exor;
+            alu_out_reg = ALU_In1 ^ ALU_In2;
             enable_reg = 3'b010;
       end
       4'h3: begin
