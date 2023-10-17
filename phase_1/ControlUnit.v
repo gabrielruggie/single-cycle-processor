@@ -6,10 +6,10 @@ module ControlUnit(
 );
 
     // High for instructions: LHB, LLB, ADD, SUB, XOR, RED, PADDSB, SLL, SRA, ROR
-    assign dst_reg = (opcode[3] == 1'b0 || opcode[3:1] == 3'b101) ? 1 : 0;
+    assign dst_reg = ( (opcode[3] == 1'b0) | (opcode[3:1] == 3'b101) ) ? 1 : 0;
 
     // High for instructions: SLL, SRA, RORO, LW, SW, LLB, LHB
-    assign alu_src = (opcode[3:2] != 2'b00 && opcode[3:2] != 2'b11 && opcode != 4'b0111) ? 1 : 0;
+    assign alu_src = ( ((opcode[3:2] == 2'b01) | (opcode[3:2] == 2'b10)) & (opcode != 4'b0111) ) ? 1 : 0;
 
     // High for instructions: LW
     assign mem_read = (opcode == 4'b1000) ? 1 : 0;
@@ -20,8 +20,8 @@ module ControlUnit(
     // High for instructions: LW
     assign mem_to_reg = (opcode == 4'b1000) ? 1 : 0;
 
-    // High for instructions: ADD, SUB, XOR, RED, SLL, SRA, ROR, PADDSB, LW, SW, LLB, LHB, B, BR, PCS, HLT
-    assign write_reg = (opcode[3:1] != 3'b110 || opcode != 4'b1001) ? 1 : 0;
+    // High for instructions: ADD, SUB, XOR, RED, SLL, SRA, ROR, PADDSB, LW, LLB, LHB, BR, PCS
+    assign write_reg = ( (opcode != 'b1101) & (opcode != 4'b1100) & (opcode != 4'b1111) ) ? 1 : 0;
 
     // High for instructions: B, BR
     assign branch_en = (opcode[3:1] == 3'b110) ? 1 : 0;
