@@ -53,20 +53,20 @@ module CPU (
 
     assign dest_reg = dst_reg ? rd : rt;
 
-    assign rs = load_higher || load_lower ? rd : imemory_out[7:4];
-    assign rt = mem_read || mem_write ? imemory_out[11:8] : imemory_out[3:0];
+    assign rs = (load_higher | load_lower) ? rd : imemory_out[7:4];
+    assign rt = (mem_read | mem_write) ? imemory_out[11:8] : imemory_out[3:0];
 
     assign rd = imemory_out[11:8];
 
-    assign imm = mem_read || mem_write ? { {12{1'b0}}, imemory_out[3:0] } << 1 : load_lower ? {{8{1'b0}}, imemory_out[7:0]} : imemory_out[7:0] << 8;
+    assign imm = (mem_read | mem_write) ? { {12{1'b0}}, imemory_out[3:0] } << 1 : 
+				  load_lower ? {{8{1'b0}}, imemory_out[7:0]} : load_higher ? imemory_out[7:0] << 8 : {{12{1'b0}},imemory_out[3:0]};
 
     assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
 
-    assign alu_in1 =    ( mem_read || mem_write) ? (rf_out1 & 16'hFFFE) :  
+    assign alu_in1 =    ( mem_read | mem_write) ? (rf_out1 & 16'hFFFE) :  
                         load_lower ? (16'hFF00 & rf_out1) :
                         load_higher ? (16'h00FF & rf_out1) : rf_out1;
     
     assign alu_in2 = alu_src ? imm : rf_out2;
-
 
 endmodule
