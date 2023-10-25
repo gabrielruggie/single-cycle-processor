@@ -1,0 +1,7 @@
+module DataHazardUnit (
+
+    
+
+);
+
+endmodule

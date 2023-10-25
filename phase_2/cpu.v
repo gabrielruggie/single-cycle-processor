@@ -21,6 +21,27 @@ module CPU (
     wire [15:0] next_addr, imm;
 
     assign hlt = halt;
+
+    // Fetch Stage
+        // 1. Pipe Line Register
+        // 2. Fetch Stage Module
+    
+    // Decode Stage
+        // 1. Pipe Line Register
+        // 2. Decode Stage Module
+
+    // Execute Stage
+        // 1. Pipe Line Register
+        // 2. Execute Stage Module
+    
+    // Memory Stage
+        // 1. Pipe Line Register
+        // 2. Memory Stage Module
+
+    // WriteBack Stage
+        // 1. Pipe Line Register
+        // 2. WriteBack Stage Module
+
     // PC Unit //
     PCUnit pcunit ( .flags(imemory_out[11:9]), .condition_codes(flag_curr), .immediate(imemory_out[8:0]), .branch_en(branch_en), .PC_in(pc_reg_out), .PC_out(pc_unit_out));
         assign next_addr = branch ? rf_out1 : pc_unit_out;
