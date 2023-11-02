@@ -52,7 +52,11 @@ module CPU (
                                .rd_mw(), .rd_xm(), .alu_out_xm(), .mem_read_de(), .mem_write_de(), .load_lower_de(), 
                                .load_higher_de(), .alu_src_de(), .immediate(), .opcode(), .flags(), .enable(), .alu_out() );
         // Pipe Line Register
-        ExecuteMemoryRegister ex_mem ();
+        ExecuteMemoryRegister ex_mem ( .clk(clk), .rst(!rst_n), .enable(), .hlt_de(), .mem_read_de(), .mem_write_de(), 
+                                       .mem_to_reg_de(), .reg_write_de(), .pcs_de(), .write_reg_de(), .opcode_de(), .rt_in(), 
+                                       .next_pc_de(), .reg2_de(), .alu_out1(), .write_reg_xm(), .rt_out(), .opcode_xm(), .hlt_xm(), 
+                                       .mem_read_xm(), .mem_write_xm(), .mem_write_xm(), .mem_to_reg_xm(), .reg_write_xm(), .pcs_xm(), 
+                                       .next_pc_xm(), .reg2_xm(), .alu_out2() );
     
     // Memory Stage
         // Memory Stage Module

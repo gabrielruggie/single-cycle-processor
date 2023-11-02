@@ -28,11 +28,13 @@ module ExecuteMemoryRegister (
     dff opcode2     ( .d(opcode_de[2]), .q(opcode_xm[2]), .wen(enable), .clk(clk), .rst(rst) );
     dff opcode3     ( .d(opcode_de[3]), .q(opcode_xm[3]), .wen(enable), .clk(clk), .rst(rst) );
 
-    dff rt0 ( .d(rt_in[0]), .q(rt_out[0]), .wen(enable), .clk(clk), .rst(rst) );
-    dff rt1 ( .d(rt_in[1]), .q(rt_out[1]), .wen(enable), .clk(clk), .rst(rst) );
-    dff rt2 ( .d(rt_in[2]), .q(rt_out[2]), .wen(enable), .clk(clk), .rst(rst) );
-    dff rt3 ( .d(rt_in[3]), .q(rt_out[3]), .wen(enable), .clk(clk), .rst(rst) );
+    dff rt0         ( .d(rt_in[0]), .q(rt_out[0]), .wen(enable), .clk(clk), .rst(rst) );
+    dff rt1         ( .d(rt_in[1]), .q(rt_out[1]), .wen(enable), .clk(clk), .rst(rst) );
+    dff rt2         ( .d(rt_in[2]), .q(rt_out[2]), .wen(enable), .clk(clk), .rst(rst) );
+    dff rt3         ( .d(rt_in[3]), .q(rt_out[3]), .wen(enable), .clk(clk), .rst(rst) );
 
-    
+    Register next_pc ( .clk(clk), .rst(rst), .D(next_pc_de), .write_en(enable), .read_en1(1'b1), .read_en2(1'b0), .bitline1(next_pc_xm), .bitline2() );
+    Register alu     ( .clk(clk), .rst(rst), .D(alu_out1), .write_en(enable), .read_en1(1'b1), .read_en2(1'b0), .bitline1(alu_out2), .bitline2() );
+    Register reg2    ( .clk(clk), .rst(rst), .D(reg2_de), .write_en(enable), .read_en1(1'b1), .read_en2(1'b0), .bitline1(reg2_xm), .bitline2() );
 
 endmodule
