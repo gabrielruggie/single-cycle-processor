@@ -7,10 +7,18 @@ module CPU (
 
 );
 
+    // Fetch Stage
+    wire [15:0] curr_pc, next_pc, curr_instr;
+    wire [15:0] curr_pc_fd, next_pc_fd, curr_intr_fd;
+    wire branch_en_fd;
+
+    // Decode Stage
+    wire [2:0] flags_prev, flags_curr, flag_en;
+
+
     // Module Inputs //
     wire im_wr, dm_wr, dm_en;
     wire [15:0] alu_in1, alu_in2, data_memory_in, imemory_in;
-    wire [2:0] flag_prev, flag_curr, flag_en;
     wire [3:0] rs, rt, rd, dest_reg;
 
     // Module Outputs //
@@ -23,32 +31,43 @@ module CPU (
     assign hlt = halt;
 
     // Fetch Stage
-        // 1. Pipe Line Register
-        // 2. Fetch Stage Module
-    
+        // Fetch Stage Module
+        FetchStage fetch ( .clk(clk), .rst(!rst_n), .branch_en(branch_en_fd), .flags_curr(flags_curr), .curr_pc(curr_pc),
+                           .curr_instr_fd(curr_instr_fd), .next_pc(next_pc), .curr_instr(curr_instr) );
+
+        // Pipe Line Register ( Enable comes from decode stage (stall) )
+        FetchDecodeRegister if_id ( .clk(clk), .rst(!rst_n), .enable(), .curr_pc(curr_pc), .next_pc(next_pc), .curr_instr(curr_instr), 
+                                    .curr_pc_fd(curr_pc_fd), next_pc_fd(next_pc_fd), .curr_intr_fd(curr_instr_fd) );
+   
     // Decode Stage
-        // 1. Pipe Line Register
-        // 2. Decode Stage Module
+        // Decode Stage Module
+        DecodeStage decode ();
+        // Pipe Line Register
+        DecodeExecuteRegister id_ex ();
 
     // Execute Stage
-        // 1. Pipe Line Register
-        // 2. Execute Stage Module
+        // Execute Stage Module
+        ExecuteStage execute ();
+        // Pipe Line Register
+        ExecuteMemoryRegister ex_mem ();
     
     // Memory Stage
-        // 1. Pipe Line Register
-        // 2. Memory Stage Module
+        // Memory Stage Module
+        MemoryStage memory ();
+        // Pipe Line Register
+        MemoryWriteBackRegister mem_wb ();
 
     // WriteBack Stage
-        // 1. Pipe Line Register
-        // 2. WriteBack Stage Module
+        // WriteBack Stage Module
+        WriteBackStage writeback ();
 
     // PC Unit //
-    PCUnit pcunit ( .flags(imemory_out[11:9]), .condition_codes(flag_curr), .immediate(imemory_out[8:0]), .branch_en(branch_en), .PC_in(pc_reg_out), .PC_out(pc_unit_out));
-        assign next_addr = branch ? rf_out1 : pc_unit_out;
+    // PCUnit pcunit ( .flags(imemory_out[11:9]), .condition_codes(flag_curr), .immediate(imemory_out[8:0]), .branch_en(branch_en), .PC_in(pc_reg_out), .PC_out(pc_unit_out));
+    //     assign next_addr = branch ? rf_out1 : pc_unit_out;
 
-    // PC Register //
-    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!halt), .Q(pc_reg_out) );
-        assign pc = pc_reg_out;
+    // // PC Register //
+    // PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!halt), .Q(pc_reg_out) );
+    //     assign pc = pc_reg_out;
 
     // Control Unit //
     ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
@@ -56,7 +75,7 @@ module CPU (
                         .hlt(halt) );
 
     // Instruction Memory //
-    InstructionMemory im ( .data_out(imemory_out), .addr(pc_reg_out), .clk(clk), .rst(!rst_n), .data_in(16'h0000), .enable(1'b1), .wr(1'b0) );
+    // InstructionMemory im ( .data_out(imemory_out), .addr(pc_reg_out), .clk(clk), .rst(!rst_n), .data_in(16'h0000), .enable(1'b1), .wr(1'b0) );
 
     // Flag Register /
     FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );

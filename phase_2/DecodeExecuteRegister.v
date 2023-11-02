@@ -2,7 +2,11 @@ module DecodeExecuteRegister (
 
     input clk, rst, enable;
 	input [15:0] rs, rt;
+
+
+	// Would these be IDEX_rs... cause its the decode_execute stage?
 	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd;
+	
 	input dst_reg, branch, mem_read, mem_to_reg, alu_src, alu_op, mem_write,
 	      write_reg;
 		  
