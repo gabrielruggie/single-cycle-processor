@@ -47,7 +47,10 @@ module CPU (
 
     // Execute Stage
         // Execute Stage Module
-        ExecuteStage execute ();
+        ExecuteStage execute ( .writeback_data(), .reg1_de(), reg2_de(), .reg_write_xm(), .reg_write_mw(), 
+                               .mem_write_xm(), .dst_reg_xm(), .dst_reg_mw(), .rs_de(), .rt_de(), .rt_xm(), 
+                               .rd_mw(), .rd_xm(), .alu_out_xm(), .mem_read_de(), .mem_write_de(), .load_lower_de(), 
+                               .load_higher_de(), .alu_src_de(), .immediate(), .opcode(), .flags(), .enable(), .alu_out() );
         // Pipe Line Register
         ExecuteMemoryRegister ex_mem ();
     
