@@ -7,6 +7,8 @@ module CPU (
 
 );
 
+    // --------------------------------------------------------------------------------------------------------- // 
+
     // Fetch Stage
     wire [15:0] curr_pc, next_pc, curr_instr;
     wire [15:0] curr_pc_fd, next_pc_fd, curr_intr_fd;
@@ -19,12 +21,19 @@ module CPU (
 
     // Execute Stage
     wire [3:0] opcode_xm, write_reg_xm; // destination register
+    wire [15:0] alu_out_xm, mem_data_xm, next_pc_xm;
+    wire pcs_xm, reg_write_xm, mem_to_reg_xm, hlt_xm, mem_write_xm, mem_read_xm;
 
     // Memory Stage
     wire b_m2m;
     wire [3:0] write_reg_mw;
+    wire [15:0] mem_data_mw, alu_out_mw, next_pc_mw, mem_data, reg2_xm;
+    wire mem_to_reg_mw, reg_write_mw, pcs_mw, hlt_mw;
 
     // WriteBack Stage
+    wire [15:0] writeback_data;
+
+    // --------------------------------------------------------------------------------------------------------- // 
 
     // Module Inputs //
     wire im_wr, dm_wr, dm_en;
@@ -73,33 +82,26 @@ module CPU (
     
     // Memory Stage
         // Memory Stage Module
-        MemoryStage memory ( .clk(clk), .rst(!rst_n), .b_m2m(b_m2m), .mem_read_xm(), .mem_write_xm(), .writeback_data(), 
-                             .reg2_xm(), .alu_out_xm(), .data_out() );
+        MemoryStage memory ( .clk(clk), .rst(!rst_n), .b_m2m(b_m2m), .mem_read_xm(mem_read_xm), .mem_write_xm(mem_write_xm), .writeback_data(writeback_data), 
+                             .reg2_xm(reg2_xm), .alu_out_xm(alu_out_xm), .data_out(mem_data) );
 
         // Pipe Line Register
-        MemoryWriteBackRegister mem_wb ( .clk(clk), .rst(!rst_n), .enable(1'b1), .hlt_xm(), .mem_to_reg_xm(), .reg_write_xm(), 
-                                         .pcs_xm(), .next_pc_xm(), .mem_data_xm(), .alu_out_xm(), .hlt_mw(), .write_reg_mw(), 
-                                         .mem_to_reg_mw(), .reg_write_mw(), .pcs_mw(), .next_pc_mw(), .mem_data_mw(), .alu_out_mw() );
+        MemoryWriteBackRegister mem_wb ( .clk(clk), .rst(!rst_n), .enable(1'b1), .hlt_xm(hlt_xm), .mem_to_reg_xm(mem_to_reg_xm), .reg_write_xm(reg_write_xm), 
+                                         .pcs_xm(pcs_xm), .next_pc_xm(next_pc_xm), .mem_data(mem_data), .alu_out_xm(alu_out_xm), .hlt_mw(hlt_mw), .write_reg_mw(write_reg_mw), 
+                                         .mem_to_reg_mw(mem_to_reg_mw), .reg_write_mw(reg_write_mw), .pcs_mw(pcs_mw), .next_pc_mw(next_pc_mw), .mem_data_mw(mem_data_mw), .alu_out_mw(alu_out_mw) );
 
     // WriteBack Stage
         // WriteBack Stage Module
-        WriteBackStage writeback ();
+        assign writeback_data = mem_to_reg_mw ? mem_data_mw : pcs_mw ? next_pc_mw : alu_out_mw;
+        // Output Halt Signal
+        assign hlt = hlt_mw;
 
-    // PC Unit //
-    // PCUnit pcunit ( .flags(imemory_out[11:9]), .condition_codes(flag_curr), .immediate(imemory_out[8:0]), .branch_en(branch_en), .PC_in(pc_reg_out), .PC_out(pc_unit_out));
-    //     assign next_addr = branch ? rf_out1 : pc_unit_out;
-
-    // // PC Register //
-    // PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!halt), .Q(pc_reg_out) );
-    //     assign pc = pc_reg_out;
+    // --------------------------------------------------------------------------------------------------------- // 
 
     // Control Unit //
     ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
                         .write_reg(write_reg), .pcs(pcs), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
                         .hlt(halt) );
-
-    // Instruction Memory //
-    // InstructionMemory im ( .data_out(imemory_out), .addr(pc_reg_out), .clk(clk), .rst(!rst_n), .data_in(16'h0000), .enable(1'b1), .wr(1'b0) );
 
     // Flag Register /
     FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );
@@ -113,16 +115,6 @@ module CPU (
         assign rt = mem_read || mem_write ? imemory_out[11:8] : imemory_out[3:0];
         assign rd = imemory_out[11:8];
 
-    // ALU //
-    // ALU alu ( .Opcode(imemory_out[15:12]), .ALU_In1(alu_in1), .ALU_In2(alu_in2), .flags(flag_curr), .enable(flag_en), .ALU_out(alu_out));
-    //     assign alu_in1 =    load_higher ? 16'h00FF & rf_out1 :
-    //                         load_lower ? 16'hFF00 & rf_out1 :
-    //                         mem_read || mem_write  ? rf_out1 & 16'hFFFE : rf_out1;
-    
-    //     assign alu_in2 = alu_src ? imm : rf_out2;
-
-    // Data Memory
-    // DataMemory dm ( .data_in(data_memory_in), .data_out(data_memory_out), .addr(alu_out), .enable(dm_en), .wr(dm_wr), .clk(clk), .rst(!rst_n) );
     
     assign imm = mem_read || mem_write ? { {12{1'b0}}, imemory_out[3:0] } << 1 : 
 				  load_lower ? {{8{1'b0}}, imemory_out[7:0]} : 
