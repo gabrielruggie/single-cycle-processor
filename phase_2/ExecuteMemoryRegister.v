@@ -1,6 +1,6 @@
 module ExecuteMemoryRegister (
 
-    input clk, rst, enable, hlt_de
+    input clk, rst, enable, hlt_de,
     input mem_read_de, mem_write_de, mem_to_reg_de, reg_write_de, pcs_de, 
     input [3:0] write_reg_de, opcode_de, rt_in, 
     input [15:0] next_pc_de, reg2_de, alu_out1, 

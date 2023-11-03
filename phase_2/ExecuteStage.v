@@ -1,6 +1,6 @@
 module ExecuteStage (
 
-    input [15:0] writeback_data, reg1_de, reg2_de
+    input [15:0] writeback_data, reg1_de, reg2_de,
     input reg_write_xm, reg_write_mw, mem_write_xm, 
     input dst_reg_xm, dst_reg_mw, rs_de, rt_de, rt_xm, rd_mw, rd_xm, 
     input alu_out_xm,
@@ -13,7 +13,7 @@ module ExecuteStage (
     input enable,
 
     output [15:0] alu_out,
-    output b_m2m;
+    output b_m2m
 
 );
 
