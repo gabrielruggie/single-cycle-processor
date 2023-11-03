@@ -12,12 +12,13 @@ module ExecuteStage (
     input [2:0] flags,
     input enable,
 
-    output [15:0] alu_out
+    output [15:0] alu_out,
+    output b_m2m;
 
 );
 
     wire [15:0] A, B;
-    wire a_x2x, a_m2x, b_x2x, b_m2x, b_m2m;
+    wire a_x2x, a_m2x, b_x2x, b_m2x;
 
     // Forwarding Logic
     assign A_fwd = a_x2x ? alu_out_xm : a_m2x ? writeback_data : reg1_de;
@@ -31,10 +32,8 @@ module ExecuteStage (
 
     assign B = alu_src_de ? immediate : reg2_de;
 
-    // 3. ALU
     ALU alu ( .Opcode(opcode), .ALU_In1(A), .ALU_In2(B), .flags(flags), .enable(enable), .ALU_out(alu_out) );
 
-    // 4. Data Hazard Unit
     DataHazardUnit dhz ( .reg_write_xm(reg_write_xm), .reg_write_mw(reg_write_mw), .mem_write(mem_write_xm), .dst_reg_xm(dst_reg_xm), 
                          .dst_reg_mw(dst_reg_mw), .rs_de(rs_de), .rt_de(rt_de), .rt_xm(rt_xm), .rd_xm(rd_xm), .rd_mw(rd_mw), .a_x2x(a_x2x), 
                          .b_x2x(b_x2x), .a_m2x(a_m2x), .b_m2x(b_m2x), .b_m2m(b_m2m) );
