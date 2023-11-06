@@ -1,17 +1,17 @@
 module DecodeExecuteRegister (
 
     input clk, rst, enable;
-	input [15:0] rs, rt;
-
-
-	// Would these be IDEX_rs... cause its the decode_execute stage?
-	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd;
+	input [15:0] rs, rt;	// rs and rt data from register file
+	input [15:0] opcode;	// current opcode 
+	input [15:0] decode_imm
+	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd;  // Reg addr to send to forwarding unit
 	
 	input dst_reg, branch, mem_read, mem_to_reg, alu_src, alu_op, mem_write,
 	      write_reg;
 		  
 	output RegDst, Branch, MemRead, MemtoReg, ALUOp, MemWrite, ALUSrc, RegWrite
-	output [15:0] rs_data, rt_data;
+	output [15:0] rs_data, rt_data;	// rs and rt data to send to ALU
+	output [15:0] imm;
 );
 
 	// WriteBack control signals
@@ -30,9 +30,14 @@ module DecodeExecuteRegister (
 	
 	// Register Data
 	Register RS(.clk,.rst,.D(rs),.write_en(enable),.read_en1(1'b1),.read_en2(1'b0),.bitline1(rs_data),.bitline2(16'hZZZZ));
-	Register RT(.clk,.rst,.D(rs),.write_en(enable),.read_en1(1'b1),.read_en2(1'b0),.bitline1(rt_data),.bitline2(16'hZZZZ));
+	Register RT(.clk,.rst,.D(rt),.write_en(enable),.read_en1(1'b1),.read_en2(1'b0),.bitline1(rt_data),.bitline2(16'hZZZZ));
+	
+	// immeditate data
+	Register im(.clk,.rst,.D(decode_imm),.write_en(enable),.read_en1(1'b1),.read_en2(1'b0),.bitline1(imm),.bitline2(16'hZZZZ));
 
 	// Register addresses
-	
+	assign IFID_RegRd = opcode [11:8];
+	assign IFID_RegRs = opcode [7:4];
+	assign IFID_RegRt = opcode[3:0];
 
 endmodule
