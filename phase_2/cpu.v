@@ -17,7 +17,13 @@ module CPU (
     // Decode Stage
     wire [2:0] flags_prev, flags_curr, flag_en;
     wire [3:0] rs, rt, rd, dest_reg, write_reg_de;
-    wire [15:0] reg1_fd, reg2_fd; // Register file outputs
+	wire [3:0] alu_opcode;
+    wire [15:0] reg1_data, reg2_data,imm_out; // Register file outputs
+	wire stall;
+	wire dst_reg_out, branch_out, mem_read_out, mem_to_reg_out, alu_src_out, mem_write_out, write_reg_out;
+	wire [3:0] de_ex_opcode;
+	wire RegDst, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite;
+	wire [15:0] de_ex_rs_data, de_ex_rt_data, de_ex_imm;
 
     // Execute Stage
     wire [3:0] opcode_xm, write_reg_xm; // destination register
@@ -59,13 +65,14 @@ module CPU (
    
     // Decode Stage
         // Decode Stage Module
-        DecodeStage decode ();
+        DecodeStage decode (.clk,.rst(!rst_n),.enable(),.flags_prev(),.flags_curr(),.flag_en(),.curr_pc_fd,.next_pc_fd,.curr_instr_fd,.stall,
+							.flush,.alu_opcode,.rs_data(reg1_data),.rt_data(reg2_data),.dst_reg_out,.branch_out,.mem_read_out,.mem_to_reg_out,.alu_src_out,
+							.mem_write_out,.write_reg_out,.imm_out);
         // Pipe Line Register
-        DecodeExecuteRegister id_ex ();
-
-        // ------------ PUT THIS IN DECODE STAGE ---------------- //
-        // Hazard Detection Signal (This should be an output of the DecodeStage Module)
-        assign stall = (opcode_xm == 4'h8 || opcode_xm[3:2] == 2'b00) && (rs == write_reg_xm) && branch_en_fd;
+        DecodeExecuteRegister id_ex (.clk,.rst(!rst_n),.enable(1'b1),.opcode(alu_opcode),.decode_imm(imm_out),.IFID_RegRs(rs),.IFID_RegRt(rt),.IFID_RegRd(rd),.dst_reg(dst_reg_out),
+									 .branch(branch_out),.mem_read(mem_read_out),.mem_to_reg(mem_to_reg_out),.alu_src(alu_src_out),.alu_op_de(de_ex_opcode),.mem_write(mem_write_out),
+									 .write_reg(write_reg_out),.RegDst,.Branch,.MemRead,
+									 .MemWrite,.ALUSrc,.RegWrite,.rs_data(de_ex_rs_data),.rt_data(de_ex_rt_data),.imm(de_ex_imm));
 
     // Execute Stage
         // Execute Stage Module
@@ -99,25 +106,25 @@ module CPU (
     // --------------------------------------------------------------------------------------------------------- // 
 
     // Control Unit //
-    ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
-                        .write_reg(write_reg), .pcs(pcs), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
-                        .hlt(halt) );
+    // ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
+                        // .write_reg(write_reg), .pcs(pcs), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
+                        //.hlt(halt) );
 
     // Flag Register /
-    FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );
+    // FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );
 
     // Register File //
-    RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
-        assign dest_reg = dst_reg ? rd : rt;
-        assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
+    // RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
+        // assign dest_reg = dst_reg ? rd : rt;
+        // assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
         
-        assign rs = load_higher || load_lower ? rd : imemory_out[7:4];
-        assign rt = mem_read || mem_write ? imemory_out[11:8] : imemory_out[3:0];
-        assign rd = imemory_out[11:8];
+        // assign rs = load_higher || load_lower ? rd : imemory_out[7:4];
+        // assign rt = mem_read || mem_write ? imemory_out[11:8] : imemory_out[3:0];
+        // assign rd = imemory_out[11:8];
 
     
-    assign imm = mem_read || mem_write ? { {12{1'b0}}, imemory_out[3:0] } << 1 : 
-				  load_lower ? {{8{1'b0}}, imemory_out[7:0]} : 
-                  load_higher ? imemory_out[7:0] << 8 : {{12{1'b0}},imemory_out[3:0]};
+    // assign imm = mem_read || mem_write ? { {12{1'b0}}, imemory_out[3:0] } << 1 : 
+				  // load_lower ? {{8{1'b0}}, imemory_out[7:0]} : 
+                  // load_higher ? imemory_out[7:0] << 8 : {{12{1'b0}},imemory_out[3:0]};
 
 endmodule
