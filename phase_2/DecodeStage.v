@@ -7,7 +7,7 @@ module DecodeStage (
 	output flush;	// if branch taken, FetchDecode Reg cleared
 	output [3:0] alu_opcode;
 	output [15:0] rs_data, rt_data;	// rs and rt data to send to ALU
-	input dst_reg_out, branch_out, mem_read_out, mem_to_reg_out, alu_src_out, mem_write_out, write_reg;
+	output dst_reg_out, branch_out, mem_read_out, mem_to_reg_out, alu_src_out, mem_write_out, write_reg;
 );
 
 	// define branch conditions
