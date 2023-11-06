@@ -1,17 +1,17 @@
 module DecodeExecuteRegister (
 
-    input clk, rst, enable;
-	input [15:0] rs, rt;	// rs and rt data from register file
-	input [15:0] opcode;	// current opcode 
-	input [15:0] decode_imm
-	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd;  // Reg addr to send to forwarding unit
+    input clk, rst, enable,
+	input [15:0] rs, rt,	// rs and rt data from register file
+	input [15:0] opcode,	// current opcode 
+	input [15:0] decode_imm,
+	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd, // Reg addr to send to forwarding unit
 	
 	input dst_reg, branch, mem_read, mem_to_reg, alu_src, alu_op, mem_write,
-	      write_reg;
+	      write_reg,
 		  
-	output RegDst, Branch, MemRead, MemtoReg, ALUOp, MemWrite, ALUSrc, RegWrite
-	output [15:0] rs_data, rt_data;	// rs and rt data to send to ALU
-	output [15:0] imm;
+	output RegDst, Branch, MemRead, MemtoReg, ALUOp, MemWrite, ALUSrc, RegWrite,
+	output [15:0] rs_data, rt_data,	// rs and rt data to send to ALU
+	output [15:0] imm
 );
 
 	// WriteBack control signals
@@ -20,7 +20,7 @@ module DecodeExecuteRegister (
 	
 	// Memory control signals
 	dff branch_ff(.q(Branch),.d(branch),.wen(enable),.clk,.rst);
-	dff memread_ff(.q(MemRead),.d(mem_read),.wen(enable).clk,.rst);
+	dff memread_ff(.q(MemRead),.d(mem_read),.wen(enable),.clk,.rst);
 	dff memwrite_ff(.q(MemWrite),.d(mem_write),.wen(enable),.clk,.rst);
 	
 	// Execute control signals
