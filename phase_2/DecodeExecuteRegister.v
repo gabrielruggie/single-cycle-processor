@@ -4,12 +4,13 @@ module DecodeExecuteRegister (
 	input [15:0] rs, rt,	// rs and rt data from register file
 	input [15:0] opcode,	// current opcode 
 	input [15:0] decode_imm,
-	input [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd, // Reg addr to send to forwarding unit
+	input [3:0] IFID_RegRs, IFID_RegRd, // Reg addr to send to forwarding unit
 	
 	input dst_reg, branch, mem_read, mem_to_reg, alu_src, alu_op, mem_write,
 	      write_reg,
 		  
-	output RegDst, Branch, MemRead, MemtoReg, ALUOp, MemWrite, ALUSrc, RegWrite,
+	output RegDst, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite,
+	output [3:0] alu_op_de,
 	output [15:0] rs_data, rt_data,	// rs and rt data to send to ALU
 	output [15:0] imm
 );
@@ -25,7 +26,10 @@ module DecodeExecuteRegister (
 	
 	// Execute control signals
 	dff regdst_ff(.q(RegDst),.d(dst_reg),.wen(enable),.clk,.rst);
-	dff aluop_ff(.q(ALUOp),.d(alu_op),.wen(enable),.clk,.rst);
+	dff aluop_ff_0(.q(ALUOp),.d(opcode[15]),.wen(enable),.clk,.rst);
+	dff aluop_ff_1(.q(ALUOp),.d(opcode[14]),.wen(enable),.clk,.rst);	
+	dff aluop_ff_2(.q(ALUOp),.d(opcode[13]),.wen(enable),.clk,.rst);
+	dff aluop_ff_3(.q(ALUOp),.d(opcode[12]),.wen(enable),.clk,.rst);
 	dff alusrc_ff(.q(ALUSrc),.d(alu_src),.wen(enable),.clk,.rst);
 	
 	// Register Data
@@ -35,9 +39,10 @@ module DecodeExecuteRegister (
 	// immeditate data
 	Register im(.clk,.rst,.D(decode_imm),.write_en(enable),.read_en1(1'b1),.read_en2(1'b0),.bitline1(imm),.bitline2(16'hZZZZ));
 
-	// Register addresses
+	// opcode & Register addresses
+	assign alu_op_de = opcode[15:12];
 	assign IFID_RegRd = opcode [11:8];
 	assign IFID_RegRs = opcode [7:4];
-	assign IFID_RegRt = opcode[3:0];
+	assign IFID_RegRt = opcode [3:0];
 
 endmodule
