@@ -2,16 +2,16 @@ module ExecuteStage (
 
     input [15:0] writeback_data, reg1_de, reg2_de,
     input reg_write_xm, reg_write_mw, mem_write_xm, 
-    input dst_reg_xm, dst_reg_mw, rs_de, rt_de, rt_xm, rd_mw, rd_xm, 
-    input alu_out_xm,
+    input [3:0] dst_reg_xm, dst_reg_mw, rs_de, rt_de, rt_xm, rd_mw, rd_xm, 
+    input [15:0] alu_out_xm,
     input mem_read_de, mem_write_de, 
     input load_lower_de, load_higher_de, 
     input alu_src_de,
     input immediate,
     input [3:0] opcode,
-    input [2:0] flags,
-    input enable,
 
+    output enable,
+    output [2:0] flags,
     output [15:0] alu_out,
     output b_m2m
 

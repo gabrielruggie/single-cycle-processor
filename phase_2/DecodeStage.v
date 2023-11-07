@@ -6,10 +6,13 @@ module DecodeStage (
 	input [3:0] opcode_xm, write_reg_xm,	// used for stall checking
 	output stall,	// Flag for sending no-op instructions
 	output flush,	// if branch taken, FetchDecode Reg cleared
-	output [15:0] opcode_out, 		// opcode to send to de_ex reg, may be no-op for stalls
+	output [15:0] instruction_de, 		// opcode to send to de_ex reg, may be no-op for stalls
 	output [15:0] rs_data, rt_data, imm_out,	// rs and rt data to send to ALU
 	output reg [15:0] branch_pc,
-	output dst_reg, branch, mem_read, mem_to_reg, alu_src, mem_write, write_reg
+	output branch, br_en, mem_read, mem_to_reg, alu_src, mem_write, write_reg, hlt, pcs,
+	output load_higher, load_lower,
+	output [3:0] write_reg,
+	output [2:0] flags
 );
 
 	// local module signals
@@ -17,7 +20,7 @@ module DecodeStage (
 	wire [3:0] IFID_RegRs, IFID_RegRt, IFID_RegRd, rs, rt, rd;
 	wire [15:0] branch_target;	// target PC from branch
 	wire [2:0]  condition_codes; // determine which comparison to do
-	wire branch_en, pcs, load_higher, load_lower, hlt;
+	wire branch_en, pcs, __load_higher, __load_lower
 	wire [15:0] branch_register, branch_reg_p_2, sign_ext_imm;
 	wire overflow;
 	reg branch_taken;
@@ -27,7 +30,7 @@ module DecodeStage (
 	
     // 2. Control Unit
 	ControlUnit cu(.opcode(curr_instr_fd[15:12]),.dst_reg,.alu_src,.mem_read,.mem_write,.mem_to_reg,
-				   .write_reg,.branch_en,.branch,.pcs,.load_higher,.load_lower,.hlt);
+				   .write_reg,.branch_en,.branch,.pcs,.__load_higher,.__load_lower,.hlt);
 
     // 3. Flag Register
     FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flags_curr(flags_curr), .enable(flag_en) );
@@ -37,7 +40,7 @@ module DecodeStage (
     assign stall = ((opcode_xm == 4'h8) | (opcode_xm[3:2] == 2'b00)) & (rs == write_reg_xm) & branch_en;
 	
 	// set opcode to no-op (PCS $0)
-	assign opcode_out = stall ? 16'hE000 : curr_instr_fd;
+	assign instruction_de = stall ? 16'hE000 : curr_instr_fd;
 	
 	// flush logic for branches, if flushing set all control signals to zero
 	assign flush = branch_taken ? 1'b1 : 1'b0;
@@ -83,11 +86,20 @@ module DecodeStage (
 	
     // 6. Register & Imm. Dataflow
 	assign imm = mem_read | mem_write ? { {12{1'b0}}, curr_instr_fd[3:0] } << 1 : 
-				  load_lower ? {{8{1'b0}}, curr_instr_fd[7:0]} : 
-                  load_higher ? curr_instr_fd[7:0] << 8 : {{12{1'b0}},curr_instr_fd[3:0]};
+				  __load_lower ? {{8{1'b0}}, curr_instr_fd[7:0]} : 
+                  __load_higher ? curr_instr_fd[7:0] << 8 : {{12{1'b0}},curr_instr_fd[3:0]};
 	
-	assign rs = load_higher | load_lower ? rd : curr_instr_fd[7:4];
+	assign rs = __load_higher | __load_lower ? rd : curr_instr_fd[7:4];
     assign rt = mem_read | mem_write ? curr_instr_fd[11:8] : curr_instr_fd[3:0];
     assign rd = curr_instr_fd[11:8];
+
+	assign load_higher = __load_higher;
+	assign load_lower = __load_lower;
+
+	assign write_reg = (dst_reg) ? rd : rt;
+
+	assign flags = flags_curr;
+
+	assign br_en = branch_en;
 	
 endmodule

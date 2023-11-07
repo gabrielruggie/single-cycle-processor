@@ -2,8 +2,8 @@ module FetchStage (
 
     input clk, rst, branch_en,
     input [2:0] flags_curr,
-    input branch_fd,
-    input [15:0] reg1_fd, curr_pc_fd, curr_instr_fd,
+    input branch,
+    input [15:0] branch_pc, curr_pc_fd, curr_instr_fd,
 
     output [15:0] curr_pc, next_pc, curr_instr,
     output flush_fd
@@ -13,8 +13,8 @@ module FetchStage (
     wire [15:0] next_addr, pc_in;
     wire branch_taken, halt;
 
-    // branch_fd comes from control unit
-    assign next_addr = branch_fd ? reg1_fd : next_pc;
+    // branch comes from control unit
+    assign next_addr = branch ? branch_pc : next_pc;
     assign pc_in = branch_en ? curr_pc_fd : curr_pc;
     assign halt = (curr_instr[15:12] == 4'hF && !branch_taken);
 
