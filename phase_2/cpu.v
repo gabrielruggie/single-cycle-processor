@@ -59,8 +59,6 @@ module CPU (
     // Logic Outputs //
     wire [15:0] next_addr, imm;
 
-    assign hlt = halt;
-
     // Fetch Stage
         // Fetch Stage Module ==> may want to try using reg1_data for branch_pc
         FetchStage fetch ( .clk(clk), .rst(!rst_n), .branch_en(branch_en), .flags_curr(flags_decode), .curr_pc_fd(curr_pc_fd), .branch_pc(branch_pc),
