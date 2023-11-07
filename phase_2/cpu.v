@@ -17,11 +17,10 @@ module CPU (
     // Decode Stage
     wire [2:0] flags_prev, flags_curr, flag_en;
     wire [3:0] rs, rt, rd, dest_reg, write_reg_de;
-	wire [3:0] alu_opcode;
-    wire [15:0] reg1_data, reg2_data,imm_out; // Register file outputs
+	wire [15:0] opcode_out;
+    wire [15:0] reg1_data, reg2_data, imm_out; // Register file outputs
 	wire stall;
-	wire dst_reg_out, branch_out, mem_read_out, mem_to_reg_out, alu_src_out, mem_write_out, write_reg_out;
-	wire [3:0] de_ex_opcode;
+	wire [15:0] branch_pc;
 	wire RegDst, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite;
 	wire [15:0] de_ex_rs_data, de_ex_rt_data, de_ex_imm;
 
@@ -65,13 +64,12 @@ module CPU (
    
     // Decode Stage
         // Decode Stage Module
-        DecodeStage decode (.clk,.rst(!rst_n),.enable(),.flags_prev(),.flags_curr(),.flag_en(),.curr_pc_fd,.next_pc_fd,.curr_instr_fd,.stall,
-							.flush,.alu_opcode,.rs_data(reg1_data),.rt_data(reg2_data),.dst_reg_out,.branch_out,.mem_read_out,.mem_to_reg_out,.alu_src_out,
-							.mem_write_out,.write_reg_out,.imm_out);
+        DecodeStage decode (.clk,.rst(!rst_n),.enable(),.flags_prev,.flags_curr,.flag_en,.curr_pc_fd,.next_pc_fd,.curr_instr_fd,.stall,
+							.flush,.opcode_out,.rs_data(reg1_data),.rt_data(reg2_data),.dst_reg,.branch,.mem_read,.mem_to_reg,.alu_src,
+							.mem_write,.write_reg,.imm_out, .opcode_xm,.write_reg_xm,.branch_pc);
         // Pipe Line Register
-        DecodeExecuteRegister id_ex (.clk,.rst(!rst_n),.enable(1'b1),.opcode(alu_opcode),.decode_imm(imm_out),.IFID_RegRs(rs),.IFID_RegRt(rt),.IFID_RegRd(rd),.dst_reg(dst_reg_out),
-									 .branch(branch_out),.mem_read(mem_read_out),.mem_to_reg(mem_to_reg_out),.alu_src(alu_src_out),.alu_op_de(de_ex_opcode),.mem_write(mem_write_out),
-									 .write_reg(write_reg_out),.RegDst,.Branch,.MemRead,
+        DecodeExecuteRegister id_ex (.clk,.rst(!rst_n),.enable(1'b1),.opcode(opcode_out),.decode_imm(imm_out),.IFID_RegRs(rs),.IFID_RegRt(rt),.IFID_RegRd(rd),.dst_reg,
+									 .branch,.mem_read,.mem_to_reg,.alu_src,.alu_op_de(de_ex_opcode),.mem_write,.write_reg,.RegDst,.Branch,.MemRead,
 									 .MemWrite,.ALUSrc,.RegWrite,.rs_data(de_ex_rs_data),.rt_data(de_ex_rt_data),.imm(de_ex_imm));
 
     // Execute Stage
