@@ -21,8 +21,9 @@ module CPU (
     wire [15:0] reg1_data, reg2_data, imm_out; // Register file outputs
 	wire stall;
 	wire [15:0] branch_pc;
-	wire RegDst, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite;
-	wire [15:0] de_ex_rs_data, de_ex_rt_data, de_ex_imm;
+	// wire RegDst, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite;
+    wire reg_dst_de, branch_de, mem_read_de, mem_to_reg_de, mem_write_de, alu_src_de, reg_write_de;
+	wire [15:0] rs_de, rt_de, imm_de;
 
     // Execute Stage
     wire [3:0] opcode_xm, write_reg_xm; // destination register
@@ -68,13 +69,13 @@ module CPU (
 							.flush,.opcode_out,.rs_data(reg1_data),.rt_data(reg2_data),.dst_reg,.branch,.mem_read,.mem_to_reg,.alu_src,
 							.mem_write,.write_reg,.imm_out, .opcode_xm,.write_reg_xm,.branch_pc);
         // Pipe Line Register
-        DecodeExecuteRegister id_ex (.clk,.rst(!rst_n),.enable(1'b1),.opcode(opcode_out),.decode_imm(imm_out),.IFID_RegRs(rs),.IFID_RegRt(rt),.IFID_RegRd(rd),.dst_reg,
-									 .branch,.mem_read,.mem_to_reg,.alu_src,.alu_op_de(de_ex_opcode),.mem_write,.write_reg,.RegDst,.Branch,.MemRead,
-									 .MemWrite,.ALUSrc,.RegWrite,.rs_data(de_ex_rs_data),.rt_data(de_ex_rt_data),.imm(de_ex_imm));
+        DecodeExecuteRegister id_ex (.clk, .rst(!rst_n), .enable(1'b1), .opcode(opcode_out), .decode_imm(imm_out), .IFID_RegRs(rs), .IFID_RegRt(rt), .IFID_RegRd(rd), .dst_reg,
+									 .branch, .mem_read,.mem_to_reg,.alu_src,.alu_op_de(de_ex_opcode),.mem_write,.write_reg,.RegDst,.Branch,.MemRead,
+									 .MemWrite(mem_write_de), .ALUSrc(alu_src_de), .RegWrite(reg_write_de), .rs_data(rs_de),.rt_data(rt_de),.imm(imm_de));
 
     // Execute Stage
         // Execute Stage Module
-        ExecuteStage execute ( .writeback_data(), .reg1_de(), .reg2_de(), .reg_write_xm(), .reg_write_mw(), 
+        ExecuteStage execute ( .writeback_data(writeback_data), .reg1_de(rs_de), .reg2_de(rt_de), .reg_write_xm(), .reg_write_mw(), 
                                .mem_write_xm(), .dst_reg_xm(), .dst_reg_mw(), .rs_de(), .rt_de(), .rt_xm(), 
                                .rd_mw(), .rd_xm(), .alu_out_xm(), .mem_read_de(), .mem_write_de(), .load_lower_de(), 
                                .load_higher_de(), .alu_src_de(), .immediate(), .opcode(), .flags(), .enable(), .alu_out() );
@@ -103,26 +104,5 @@ module CPU (
 
     // --------------------------------------------------------------------------------------------------------- // 
 
-    // Control Unit //
-    // ControlUnit cu ( .opcode(imemory_out[15:12]), .dst_reg(dst_reg), .alu_src(alu_src), .mem_read(mem_read), .mem_write(mem_write), .mem_to_reg(mem_to_reg), 
-                        // .write_reg(write_reg), .pcs(pcs), .branch_en(branch_en), .branch(branch), .load_higher(load_higher), .load_lower(load_lower), 
-                        //.hlt(halt) );
-
-    // Flag Register /
-    // FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flag_curr(flag_curr), .enable(flag_en) );
-
-    // Register File //
-    // RegisterFile rf ( .clk(clk), .rst(!rst_n), .src_reg1(rs), .src_reg2(rt), .dst_reg(dest_reg), .write_en(write_reg), .dst_data(dst_data), .src_data1(rf_out1), .src_data2(rf_out2) );
-        // assign dest_reg = dst_reg ? rd : rt;
-        // assign dst_data = mem_to_reg ? data_memory_out : pcs ? pc_unit_out : alu_out;
-        
-        // assign rs = load_higher || load_lower ? rd : imemory_out[7:4];
-        // assign rt = mem_read || mem_write ? imemory_out[11:8] : imemory_out[3:0];
-        // assign rd = imemory_out[11:8];
-
-    
-    // assign imm = mem_read || mem_write ? { {12{1'b0}}, imemory_out[3:0] } << 1 : 
-				  // load_lower ? {{8{1'b0}}, imemory_out[7:0]} : 
-                  // load_higher ? imemory_out[7:0] << 8 : {{12{1'b0}},imemory_out[3:0]};
 
 endmodule
