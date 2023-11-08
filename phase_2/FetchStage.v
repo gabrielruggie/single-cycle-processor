@@ -1,35 +1,30 @@
 module FetchStage (
 
     input clk, rst, branch_en,
-    input [2:0] flags_curr,
-    input branch,
-    input [15:0] branch_pc, curr_pc_fd, curr_instr_fd,
+    input [15:0] branch_pc,
+    input stall_de,
 
-    output [15:0] curr_pc, next_pc, curr_instr,
-    output flush_fd
-
+    output [15:0] curr_pc_f, curr_instr,
+    output hlt
 );
 
-    wire [15:0] next_addr, pc_in;
-    wire branch_taken, halt;
+    wire [15:0] next_addr, curr_pc;
+    wire branch_taken, halt, overflow;
+
+    // calculate next_pc = curr_pc + 4
+    cla_16bit CLA0 ( .A(curr_pc), .B(16'h0004), .Sum(next_pc), .Ovfl(overflow), .sub(1'b0) );
 
     // branch comes from control unit
-    assign next_addr = branch ? branch_pc : next_pc;
-    assign pc_in = branch_en ? curr_pc_fd : curr_pc;
-    assign halt = (curr_instr[15:12] == 4'hF && !branch_taken);
-
+    assign next_addr = branch_en ? branch_pc : next_pc;
+    assign halt = ( (curr_instr[15:12] == 4'hF) & (!branch_en) ) ? 1'b1 : 1'b0;
+    assign pc_reg_en = stall_de | halt ? 1'b0 : 1'b1;
+    assign next_pc = curr_pc_f;
 
     // PC Register
-    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(!halt), .Q(curr_pc) );
-
-    // PC Control Unit
-    PCUnit pcunit ( .flags(curr_instr_fd[11:9]), .condition_codes(flags_curr), .immediate(curr_instr_fd[8:0]), 
-                    .branch_en(branch_en), .PC_in(pc_in), .PC_out(next_pc), .branch_taken());
+    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(pc_reg_en), .Q(curr_pc) );
 
     // Instruction Memory
     InstructionMemory im ( .data_out(curr_instr), .addr(curr_pc), .clk(clk), .rst(!rst_n), .data_in(16'h0000), 
                             .enable(1'b1), .wr(1'b0) );
-
-    assign flush_fd = branch_taken;
 
 endmodule
