@@ -7,10 +7,10 @@ module ExecuteStage (
     input mem_read_de, mem_write_de, 
     input load_lower_de, load_higher_de, 
     input alu_src_de,
-    input immediate,
+    input [15:0] immediate,
     input [3:0] opcode,
 
-    output enable,
+    output [2:0] enable,
     output [2:0] flags,
     output [15:0] alu_out,
     output b_m2m

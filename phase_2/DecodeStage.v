@@ -1,17 +1,22 @@
+
+// Note: There are 31 inputs and outputs declared however, we are only using 30 in the cpu...
+
 module DecodeStage (
 	
-	input clk, rst_n, enable,
+	input clk, rst, enable,
 	input [2:0] flags_prev, flags_curr, flag_en,
 	input [15:0] curr_pc_fd, curr_instr_fd,
 	input [3:0] opcode_xm, write_reg_xm,	// used for stall checking
+	input [15:0] writeback_data,
+	
 	output stall,	// Flag for sending no-op instructions
 	output flush,	// if branch taken, FetchDecode Reg cleared
 	output [15:0] instruction_de, 		// opcode to send to de_ex reg, may be no-op for stalls
 	output [15:0] rs_data, rt_data, imm_out,	// rs and rt data to send to ALU
-	output reg [15:0] branch_pc,
-	output branch, br_en, mem_read, dst_reg, mem_to_reg, alu_src, mem_write, write_reg, hlt, pcs,
+	output [15:0] branch_pc,
+	output branch, br_en, mem_read, dst_reg, mem_to_reg, alu_src, mem_write, reg_write, hlt, pcs,
 	output load_higher, load_lower,
-	output [3:0] write_reg_de,
+	output [3:0] write_reg,
 	output [2:0] flags
 );
 
@@ -22,19 +27,21 @@ module DecodeStage (
 	wire branch_en, __load_higher, __load_lower;
 	wire overflow;
 	wire branch_taken;
+	wire __write_en;
 	
-    // 1. Register File
-	RegisterFile rf(.clk,.rst(!rst_n),.src_reg1(rs),.src_reg2(rt),.dst_reg(rd),.write_en(write_reg),.dst_data(rd),.src_data1(rs_data),.src_data2(rt_data));
 	
-    // 2. Control Unit
+    // 1. Control Unit
 	ControlUnit cu(.opcode(curr_instr_fd[15:12]),.dst_reg,.alu_src,.mem_read,.mem_write,.mem_to_reg,
-				   .write_reg,.branch_en,.branch,.pcs,.__load_higher,.__load_lower,.hlt);
+				   .write_reg(__write_en),.branch_en,.branch,.pcs, .load_higher(__load_higher), .load_lower(__load_lower), .hlt);
+
+    // 2. Register File
+	RegisterFile rf(.clk,.rst(rst),.src_reg1(rs),.src_reg2(rt),.dst_reg(write_reg_xm),.write_en(__write_en),.dst_data(writeback_data),.src_data1(rs_data),.src_data2(rt_data));
 				   
 	// Branch Calcuation done by PCUnit
 	PCUnit PCU(.flags(flags_curr), .condition_codes, .immediate(curr_instr_fd[8:0]), .rs_data, .branch, .PC_in(curr_pc_fd), .PC_out(branch_pc), .branch_taken);
 
     // 3. Flag Register
-    FlagRegister fr ( .clk(clk), .rst(!rst_n), .flag_prev(flag_prev), .flags_curr(flags_curr), .enable(flag_en) );
+    FlagRegister fr ( .clk(clk), .rst(rst), .flag_prev(flags_prev), .flag_curr(flags), .enable(flag_en) );
 
     // 4. Control Hazard Unit
 	// Hazard Detection Signal
@@ -59,10 +66,12 @@ module DecodeStage (
 	assign load_higher = __load_higher;
 	assign load_lower = __load_lower;
 
-	assign write_reg_de = (dst_reg) ? rd : rt;
+	assign write_reg = (dst_reg) ? rd : rt;
 
 	assign flags = flags_curr;
 
 	assign br_en = branch_en;
+	
+	assign reg_write = __write_en;
 	
 endmodule

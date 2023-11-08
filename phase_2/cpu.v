@@ -27,7 +27,7 @@ module CPU (
     wire [15:0] reg1_de, reg2_de, imm_de;
     wire [15:0] next_pc_de;
     wire pcs, load_higher, load_lower;
-    wire hlt_de, pcs_de, load_higher_de, load_lower_de;
+    wire __hlt, hlt_de, pcs_de, load_higher_de, load_lower_de;
     wire dst_reg, alu_src, mem_read, mem_write, mem_to_reg, branch, branch_en, halt;
 
     // Execute Stage
@@ -62,46 +62,46 @@ module CPU (
     // Fetch Stage
         // Fetch Stage Module ==> may want to try using reg1_data for branch_pc
         FetchStage fetch ( .clk(clk), .rst(!rst_n), .branch_en(branch_en), .branch_pc(branch_pc),
-                           .stall_de(stall), .curr_instr(curr_instr) );
+                           .stall_de(stall), .curr_instr(curr_instr_f) );
 
         // Pipe Line Register ( Enable comes from decode stage (stall) )
         FetchDecodeRegister if_id ( .clk(clk), .rst(flush), .enable(!stall), .curr_pc(curr_pc_f), .curr_instr(curr_instr_f), 
-                                    .curr_pc_fd(curr_pc_fd), .curr_intr_fd(curr_instr_fd) );
+                                    .curr_pc_fd(curr_pc_fd), .curr_instr_fd(curr_instr_fd) );
    
     // Decode Stage
         // Decode Stage Module
         DecodeStage decode (.clk, .rst(!rst_n), .enable(), .flags_prev(flags_alu), .flags_curr(flags_decode), .flag_en, .curr_pc_fd, .curr_instr_fd, .stall,
 							.flush, .instruction_de, .rs_data(reg1_data), .rt_data(reg2_data), .dst_reg, .br_en(branch_en), .branch(branch), .mem_read, .mem_to_reg, .alu_src,
-							.mem_write, .write_reg(reg_write), .imm_out, .opcode_xm, .write_reg_xm, .branch_pc, .hlt(hlt_de), .pcs(pcs), 
-                            .load_higher(load_higher), .load_lower(load_lower), .write_reg(write_reg) );
+							.mem_write, .reg_write(reg_write), .imm_out, .opcode_xm, .write_reg_xm, .branch_pc, .hlt(__hlt), .pcs(pcs), 
+                            .load_higher(load_higher), .load_lower(load_lower), .write_reg(write_reg), .writeback_data(writeback_data), .flags(flags_decode));
         // Pipe Line Register
         DecodeExecuteRegister id_ex (.clk, .rst(!rst_n), .enable(1'b1), .instruction_de(instruction_de), .decode_imm(imm_out), .rs_de(rs_de), .rt_de(rt_de), .rd_de(rd_de),
 									 .branch, .mem_read, .mem_to_reg, .alu_src, .opcode_de(opcode_de), .mem_write, .write_reg(reg_write), .reg_dst_de, .branch_de, .mem_read_de,
-									 .mem_write_de, .alu_src_de, .reg_write_de, .reg1_de, .reg2_de,.imm_de,
-                                     .hlt(hlt), .pcs(pcs), .load_higher(load_higher_de), .load_lower(load_lower), .hlt_de(hlt_de), .pcs_de(pcs_de), .load_higher_de(load_higher_de),
-                                     .load_lower_de(load_lower_de), .write_reg_de(write_reg_de), .next_pc_de(next_pc_de));
+									 .mem_write_de, .alu_src_de, .reg_write_de, .rs_data(reg1_de), .rt_data(reg2_de), .imm(imm_de),
+                                     .hlt(__hlt), .pcs(pcs), .load_higher(load_higher_de), .load_lower(load_lower), .hlt_de(hlt_de), .pcs_de(pcs_de), .load_higher_de(load_higher_de),
+                                     .load_lower_de(load_lower_de), .write_reg(write_reg), .next_pc_de(next_pc_de), .next_pc_fd(curr_pc_fd), .write_reg_de(write_reg_de));
 
     // Execute Stage
         // Execute Stage Module
         ExecuteStage execute ( .writeback_data(writeback_data), .reg1_de(reg1_de), .reg2_de(reg2_de), .reg_write_xm(reg_write_xm), .reg_write_mw(reg_write_mw), 
                                .mem_write_xm(mem_write_xm), .dst_reg_xm(write_reg_xm), .dst_reg_mw(write_reg_mw), .rs_de(rs_de), .rt_de(rt_de), .rt_xm(rt_xm), 
                                .rd_mw(write_reg_mw), .rd_xm(write_reg_xm), .alu_out_xm(alu_out_xm), .mem_read_de(mem_read_de), .mem_write_de(mem_write_de), .load_lower_de(load_lower_de), 
-                               .load_higher_de(load_higher_de), .alu_src_de(alu_src_de), .immediate(imm_de), .opcode(opcode_de), .flags(flags_alu), .enable(flag_en), .alu_out(alu_out) );
+                               .load_higher_de(load_higher_de), .alu_src_de(alu_src_de), .immediate(imm_de), .opcode(opcode_de), .flags(flags_alu), .enable(flag_en), .alu_out(alu_out), .b_m2m(b_m2m));
         // Pipe Line Register
         ExecuteMemoryRegister ex_mem ( .clk(clk), .rst(!rst_n), .enable(1'b1), .hlt_de(hlt_de), .mem_read_de(mem_read_de), .mem_write_de(mem_write_de), 
                                        .mem_to_reg_de(mem_to_reg_de), .reg_write_de(reg_write_de), .pcs_de(pcs_de), .write_reg_de(write_reg_de), .opcode_de(opcode_de), .rt_in(rt_de), 
                                        .next_pc_de(next_pc_de), .reg2_de(reg2_de), .alu_out1(alu_out), .write_reg_xm(write_reg_xm), .rt_out(rt_xm), .opcode_xm(opcode_xm), .hlt_xm(hlt_xm), 
                                        .mem_read_xm(mem_read_xm), .mem_write_xm(mem_write_xm), .mem_to_reg_xm(mem_to_reg_xm), .reg_write_xm(reg_write_xm), .pcs_xm(pcs_xm), 
-                                       .next_pc_xm(next_pc_xm), .reg2_xm(reg2_xm), .alu_out2(alu_out_xm), .b_m2m(b_m2m) );
+                                       .next_pc_xm(next_pc_xm), .reg2_xm(reg2_xm), .alu_out2(alu_out_xm) );
     
-    // Memory Stage
+    // Memory Stage	
         // Memory Stage Module
         MemoryStage memory ( .clk(clk), .rst(!rst_n), .b_m2m(b_m2m), .mem_read_xm(mem_read_xm), .mem_write_xm(mem_write_xm), .writeback_data(writeback_data), 
                              .reg2_xm(reg2_xm), .alu_out_xm(alu_out_xm), .data_out(mem_data) );
 
         // Pipe Line Register
         MemoryWriteBackRegister mem_wb ( .clk(clk), .rst(!rst_n), .enable(1'b1), .hlt_xm(hlt_xm), .mem_to_reg_xm(mem_to_reg_xm), .reg_write_xm(reg_write_xm), .write_reg_xm(write_reg_xm),
-                                         .pcs_xm(pcs_xm), .next_pc_xm(next_pc_xm), .mem_data(mem_data), .alu_out_xm(alu_out_xm), .hlt_mw(hlt_mw), .write_reg_mw(write_reg_mw), 
+                                         .pcs_xm(pcs_xm), .next_pc_xm(next_pc_xm), .mem_data_xm(mem_data), .alu_out_xm(alu_out_xm), .hlt_mw(hlt_mw), .write_reg_mw(write_reg_mw), 
                                          .mem_to_reg_mw(mem_to_reg_mw), .reg_write_mw(reg_write_mw), .pcs_mw(pcs_mw), .next_pc_mw(next_pc_mw), .mem_data_mw(mem_data_mw), .alu_out_mw(alu_out_mw) );
 
     // WriteBack Stage

@@ -1,14 +1,16 @@
+
+// Note: next_pc isn't being used and has two lines driving it. Line 18 and 24 both assign next_pc. Unsure if this is what you wanted
+
 module FetchStage (
 
     input clk, rst, branch_en,
     input [15:0] branch_pc,
     input stall_de,
 
-    output [15:0] curr_pc_f, curr_instr,
-    output hlt
+    output [15:0] curr_pc_f, curr_instr
 );
 
-    wire [15:0] next_addr, curr_pc;
+    wire [15:0] next_addr, curr_pc, next_pc;
     wire branch_taken, halt, overflow;
 
     // calculate next_pc = curr_pc + 4
@@ -18,7 +20,11 @@ module FetchStage (
     assign next_addr = branch_en ? branch_pc : next_pc;
     assign halt = ( (curr_instr[15:12] == 4'hF) & (!branch_en) ) ? 1'b1 : 1'b0;
     assign pc_reg_en = stall_de | halt ? 1'b0 : 1'b1;
-    assign next_pc = curr_pc_f;
+    
+    
+    assign next_pc = curr_pc_f; // Why is this here? 
+    // assign curr_pc_f = next_pc; Do you mean this?
+
 
     // PC Register
     PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(pc_reg_en), .Q(curr_pc) );
