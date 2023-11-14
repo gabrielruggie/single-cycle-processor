@@ -1,6 +1,3 @@
-
-// Note: next_pc isn't being used and has two lines driving it. Line 18 and 24 both assign next_pc. Unsure if this is what you wanted
-
 module FetchStage (
 
     input clk, rst, branch_en,
@@ -13,24 +10,21 @@ module FetchStage (
     wire [15:0] next_addr, curr_pc, next_pc;
     wire branch_taken, halt, overflow;
 
-    // calculate next_pc = curr_pc + 4
-    cla_16bit CLA0 ( .A(curr_pc), .B(16'h0004), .Sum(next_pc), .Ovfl(overflow), .sub(1'b0) );
+    // calculate next_pc = curr_pc + 2
+    cla_16bit CLA0 ( .A(curr_pc), .B(16'h0002), .Sum(next_pc), .Ovfl(overflow), .sub(1'b0) );
 
     // branch comes from control unit
     assign next_addr = branch_en ? branch_pc : next_pc;
     assign halt = ( (curr_instr[15:12] == 4'hF) & (!branch_en) ) ? 1'b1 : 1'b0;
     assign pc_reg_en = stall_de | halt ? 1'b0 : 1'b1;
     
-    
-    assign next_pc = curr_pc_f; // Why is this here? 
-    // assign curr_pc_f = next_pc; Do you mean this?
-
+    assign curr_pc_f = next_pc;
 
     // PC Register
-    PCRegister pcreg ( .clk(clk), .rst(!rst_n), .D(next_addr), .write_en(pc_reg_en), .Q(curr_pc) );
+    PCRegister pcreg ( .clk(clk), .rst(rst), .D(next_addr), .write_en(pc_reg_en), .Q(curr_pc) );
 
     // Instruction Memory
-    InstructionMemory im ( .data_out(curr_instr), .addr(curr_pc), .clk(clk), .rst(!rst_n), .data_in(16'h0000), 
+    InstructionMemory im ( .data_out(curr_instr), .addr(curr_pc), .clk(clk), .rst(rst), .data_in(16'h0000), 
                             .enable(1'b1), .wr(1'b0) );
 
 endmodule

@@ -25,56 +25,58 @@ module ALU(
   cla_16bit SUBER ( .A(ALU_In1), .B(ALU_In2), .Sum(difference), .Ovfl(ovflow1), .sub(1'b1) );
   red_16bit RED   (.Sum(red),.A(ALU_In1),.B(ALU_In2));
   cla_paddsb_16bit PDDSB ( .A(ALU_In1), .B(ALU_In2), .Sum(paddsb), .sub(1'b0) );
-  shifter Shift(.Shift_Out(shft_out),.Shift_In(ALU_In1),.Shift_Val(ALU_In2[3:0]),.Mode(Opcode[1:0]));
+  shifter Shift(.Shift_Out(shft_out),.Shift_In(ALU_In1),.Shift_Val(ALU_In2[3:0]), .Mode(Opcode[1:0]));
 
   // case selection depending on opcode
   always @(*) begin
+  
+	flags_reg = 3'b000;
     
     case (Opcode) 
 
-      4'h0: begin
+      4'h0: begin	// ADD
             alu_out_reg = sum;
             enable_reg = 3'b111;
 
             flags_reg[0] = ovflow0 ? 1'b1 : 1'b0;
             flags_reg[2] = sum[15] ? 1'b1 : 1'b0;
       end
-      4'h1: begin
+      4'h1: begin	// SUB
             alu_out_reg = difference;
             enable_reg = 3'b111;
 
             flags_reg[0] = ovflow1 ? 1'b1 : 1'b0;
             flags_reg[2] = difference[15] ? 1'b1 : 1'b0;
       end
-      4'h2: begin
+      4'h2: begin	// XOR
             alu_out_reg = ALU_In1 ^ ALU_In2;
             enable_reg = 3'b010;
       end
-      4'h3: begin
+      4'h3: begin	// RED
             alu_out_reg = red;
             enable_reg = 3'b010;
       end
-      4'h4: begin
+      4'h4: begin	// SLL
             alu_out_reg = shft_out;
             enable_reg = 3'b010;
       end
-      4'h5: begin
+      4'h5: begin	// SRA
             alu_out_reg = shft_out;
             enable_reg = 3'b010;
       end
-      4'h6: begin
+      4'h6: begin	// ROR, propogating unkowns out flags
             alu_out_reg = shft_out;
             enable_reg = 3'b010;
       end
-      4'h7: begin
+      4'h7: begin	// PADDSB
             alu_out_reg = paddsb;
             enable_reg = 3'b010;
       end
-      4'h8: begin
+      4'h8: begin	// LW
             alu_out_reg = sum;
             enable_reg = 3'b000;
       end
-      4'h9: begin
+      4'h9: begin	// SW
             alu_out_reg = sum;
             enable_reg = 3'b000;
       end

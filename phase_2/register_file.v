@@ -19,7 +19,7 @@ module RegisterFile (
     ReadDecoder_4_16 rd1 ( .regid(src_reg2), .wordline(r_decoder2) );
     WriteDecoder_4_16 w0 ( .regid(dst_reg), .write_en(write_en), .wordline(w_decoder) );
 
-    Register register0 ( .clk(clk), .rst(rst), .D(dst_data), .write_en(w_decoder[0]), .read_en1(r_decoder1[0]), .read_en2(r_decoder2[0]), .bitline1(reg_data1), .bitline2(reg_data2) );
+    Register register0 ( .clk(clk), .rst(rst), .D(16'h0000), .write_en(w_decoder[0]), .read_en1(r_decoder1[0]), .read_en2(r_decoder2[0]), .bitline1(reg_data1), .bitline2(reg_data2) );
     Register register1 ( .clk(clk), .rst(rst), .D(dst_data), .write_en(w_decoder[1]), .read_en1(r_decoder1[1]), .read_en2(r_decoder2[1]), .bitline1(reg_data1), .bitline2(reg_data2) );
     Register register2 ( .clk(clk), .rst(rst), .D(dst_data), .write_en(w_decoder[2]), .read_en1(r_decoder1[2]), .read_en2(r_decoder2[2]), .bitline1(reg_data1), .bitline2(reg_data2) );
     Register register3 ( .clk(clk), .rst(rst), .D(dst_data), .write_en(w_decoder[3]), .read_en1(r_decoder1[3]), .read_en2(r_decoder2[3]), .bitline1(reg_data1), .bitline2(reg_data2) );

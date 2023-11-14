@@ -6,7 +6,7 @@ module MemoryWriteBackRegister (
     input [3:0] write_reg_xm,
 
     output hlt_mw,
-    output mem_to_reg_mw, reg_write_mw, pcs_mw,
+    output mem_to_reg_mw, reg_write_mw, pcs_mw, //load_lower_mw, load_higher_mw,
     output [3:0] write_reg_mw,
     output [15:0] next_pc_mw, mem_data_mw, alu_out_mw
 

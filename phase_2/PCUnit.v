@@ -6,6 +6,7 @@ module PCUnit (
     input branch,			// from control unit
     input [15:0] PC_in,		// current pc in decode cycle
     output [15:0] PC_out,	// branch_pc to send to fetch stage
+	output [15:0] PCS,		// next pc from pc for PC Store instructions
     output reg branch_taken
 
 );
@@ -25,6 +26,8 @@ module PCUnit (
 	assign sign_ext_imm = { {7{immediate[8]} } , immediate } << 1;
     cla_16bit CLA0 ( .A(PC_in), .B(16'h0002), .Sum(PC_p_2), .Ovfl(overflow), .sub(1'b0) );
     cla_16bit CLA1 ( .A(PC_p_2), .B(sign_ext_imm), .Sum(branch_target), .Ovfl(overflow), .sub(1'b0) ); 
+	
+	assign PCS = PC_p_2;
 	
 	// evaluate if branch is taken based on the current flags and condition codes
     always @(*) begin
