@@ -14,7 +14,7 @@ module CacheFillFsm (
     wire [3:0] addr_in, addr_out;
     wire [3:0] count_in, count_out;
     wire [3:0] sum;
-    wire curr_st, nxt_st, blocks_left;
+    wire curr_st, nxt_st, full;
     wire fsm_busy_curr, fsm_busy_nxt;
     wire rst_cntr0, rst_cntr1;
 
@@ -27,11 +27,11 @@ module CacheFillFsm (
     dff state ( .clk(clk), .rst(rst), .q(curr_st), .d(nxt_st), .wen(1'b1) );
         assign nxt_st = fsm_busy_curr;
     dff busy ( .clk(clk), .rst(rst), .q(fsm_busy_curr), .d(fsm_busy_nxt), .wen(1'b1) );
-        assign fsm_busy_curr = curr_st ? blocks_left : miss_detected; 
+        assign fsm_busy_curr = curr_st ? full : miss_detected; 
     
-    assign blocks_left = curr_st && !(count_out == 4'b1011);
+    assign full = curr_st && !(count_out == 4'b1011);
     
-    cla_4bit inc_count ( .A(count_out), .B(4'b0001), .Sum(count_in), .Cin(1'b0), .P(), .G() );
+    cla_4bit inc_count ( .A(count_out), .B(4'b0001), .Sum(sum), .Cin(1'b0), .P(), .G() );
     cla_4bit inc_addr ( .A(addr_out), .B(4'b0001), .Sum(addr_in), .Cin(1'b0), .P(), .G() );
 
     dff count [3:0] ( .clk(clk), .rst(rst_cntr0), .q(count_out), .d(count_in), .wen(nxt_st) );
