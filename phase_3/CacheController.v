@@ -17,6 +17,7 @@ module CacheController (
 
     wire write_tag_array;
     wire stall;
+    wire w0, w1;
 
     wire icache_miss, dcache_miss;
     wire iwrite0, iwrite1, dwrite0, dwrite1;
@@ -51,7 +52,7 @@ module CacheController (
     Decoder3to8 dword ( .data_in(daddress[3:1]), .wordline(dword_sel) );
 
     // Cache Miss State Machine
-    CacheFillFsm cache_fsm ( .clk(clk), .rst(rst), .miss_detected(miss_detected), .mem_data_vld(mem_data_vld), .miss_addr(miss_addr), .w0(), .w1(), .fsm_busy(stall), .write_data_array(write_data_array), 
+    CacheFillFsm cache_fsm ( .clk(clk), .rst(rst), .miss_detected(miss_detected), .mem_data_vld(mem_data_vld), .miss_addr(miss_addr), .w0(w0), .w1(w1), .fsm_busy(stall), .write_data_array(write_data_array), 
                              .write_tag_array(write_tag_array), .mem_address(mem_address), .sel(word_sel) );
         assign miss_detected = cache_enable && ( icache_miss || dcache_miss );
 

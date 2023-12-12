@@ -106,6 +106,11 @@ module CPU (
 
     // --------------------------------------------------------------------------------------------------------- // 
 
+        CacheController controller ( .clk(), .rst(), .iwrite(), .iread(), .dwrite(), .dread(), .iaddress(), .daddress(), .data_in(), 
+                                     .fetch_stall(), .mem_stall(), .icache_hit(), .dcache_hit(), .instruction_out(), .data_out() );
+
+    // --------------------------------------------------------------------------------------------------------- // 
+
 	// make pc available to test bench
 	assign pc = curr_pc_fd;
 
