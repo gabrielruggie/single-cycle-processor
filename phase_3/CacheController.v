@@ -26,7 +26,13 @@ module CacheController (
     wire [15:0] miss_addr;
     wire [15:0] icache_data_in, dcache_data_in;
 
+    // Come out of caches
+    wire [15:0] icache_out0, icache_out1, dcache_out0, dcache_out1;
+
     wire [7:0] icache_word_sel, dcache_word_sel;
+
+    wire miss_detected, mem_data_vld;
+    wire multi_mem_enable;
 
     // iCache
     dff instr_tag_arr0[7:0] ( .clk(clk), .rst(rst), .wen(1'b1), .d(itag0_nxt), .q(itag0_curr));
@@ -45,10 +51,13 @@ module CacheController (
     Decoder3to8 dword ( .data_in(daddress[3:1]), .wordline(dword_sel) );
 
     // Cache Miss State Machine
-    CacheFillFsm cache_fsm ( .clk(clk), .rst(rst), .miss_detected(), .mem_data_vld(), .miss_addr(), .w0(), .w1(), .fsm_busy(stall), .write_data_array(), 
-                             .write_tag_array(), .mem_address(), .sel(word_sel) );
+    CacheFillFsm cache_fsm ( .clk(clk), .rst(rst), .miss_detected(miss_detected), .mem_data_vld(mem_data_vld), .miss_addr(miss_addr), .w0(), .w1(), .fsm_busy(stall), .write_data_array(write_data_array), 
+                             .write_tag_array(write_tag_array), .mem_address(mem_address), .sel(word_sel) );
+        assign miss_detected = cache_enable && ( icache_miss || dcache_miss );
 
-    MultiCycleMemory multi_mem ( .data_out(mem_data), .data_in(), .addr(), .enable(), .wr(), .clk(), .rst(), .data_valid() );
+    MultiCycleMemory multi_mem ( .data_out(mem_data), .data_in(data_in), .addr(mem_address), .enable(multi_mem_enable), .wr(multi_mem_write), .clk(clk), .rst(rst), .data_valid(mem_data_vld) );
+        assign multi_mem_enable = icache_miss || dcache_miss;
+        assign multi_mem_write = dwrite && !stall;
 
     assign cache_enable = iwrite | iread | dwrite | dread;
 
@@ -80,8 +89,12 @@ module CacheController (
 
     assign fetch_stall = ( iread || iwrite ) && stall;
     assign mem_stall = ( dread || dwrite ) && stall;
+
     assign icache_hit = !icache_miss && ( iwrite || iread );
     assign dcache_hit = !dcache_miss && ( dwrite || dread );
+
+    assign instruction_out = stall ? 0 : iwrite0 ? : icache_out0 : icache_out1;
+    assign data_out = stall ? 0 : dwrite0 ? : dcache_out0 : dcache_out1;
 
     // Output Signals //
 
