@@ -5,8 +5,9 @@ module DecodeStage (
 	input [15:0] curr_pc_fd, curr_instr_fd,
 	input [3:0] opcode_xm, write_reg_xm,	// used for stall checking
 	input [15:0] writeback_data,
+	input stall,
 	
-	output stall,	// Flag for sending no-op instructions
+	// output stall,	// Flag for sending no-op instructions
 	output flush,	// if branch taken, FetchDecode Reg cleared
 	output [15:0] instruction_de, 		// opcode to send to de_ex reg, may be no-op for stalls
 	output [15:0] rs_data, rt_data, imm_d,	// rs and rt data to send to ALU
@@ -44,7 +45,7 @@ module DecodeStage (
 
     // 4. Control Hazard Unit
 	// Hazard Detection Signal
-    assign stall = ((opcode_xm == 4'h8) | (opcode_xm[3:2] == 2'b00)) & (rs == write_reg_xm) & branch_en;
+    // assign stall = ((opcode_xm == 4'h8) | (opcode_xm[3:2] == 2'b00)) & (rs == write_reg_xm) & branch_en;
 	
 	// set opcode to no-op on stall (execute PCS $0)
 	assign instruction_de = stall ? 16'hE000 : curr_instr_fd;

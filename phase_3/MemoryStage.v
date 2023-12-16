@@ -1,14 +1,15 @@
+// data_out now comes from cache
 module MemoryStage (
 
     input clk, rst,
     input b_m2m, mem_read_xm, mem_write_xm,
     input [15:0] writeback_data, reg2_xm, alu_out_xm,
 
-    output [15:0] data_out
+    output [15:0] data_in
 
 );
 
-    wire [15:0] data_in;
+    wire [15:0] data_out;
 
     assign data_in = b_m2m ? writeback_data : reg2_xm;
     assign enable = mem_read_xm || mem_write_xm;

@@ -19,28 +19,33 @@ module Decoder6to64 (
                     (data_in < 56) ? 3'h6 : 3'h7;
 
     Decoder3to8 dec38 ( .data_in(match), .wordline(dec_out) );
+    
+    // assign wordline_reg = '0;
 
     // May not need wordline_reg
     // dec_out may need to be a reg
     always @(*) begin
+    
+    	// Try assign statement above if this doesn't work.
+        wordline_reg = '0;
         
         case (match)
 
-            3'h0: assign wordline_reg[7:0] = dec_out;
+            3'h0: wordline_reg[7:0] = dec_out;
 
-            3'h1: assign wordline_reg[15:8] = dec_out;
+            3'h1: wordline_reg[15:8] = dec_out;
 
-            3'h2: assign wordline_reg[23:16] = dec_out;
+            3'h2: wordline_reg[23:16] = dec_out;
 
-            3'h3: assign wordline_reg[31:24] = dec_out;
+            3'h3: wordline_reg[31:24] = dec_out;
 
-            3'h4: assign wordline_reg[39:32] = dec_out;
+            3'h4: wordline_reg[39:32] = dec_out;
 
-            3'h5: assign wordline_reg[47:40] = dec_out;
+            3'h5: wordline_reg[47:40] = dec_out;
 
-            3'h6: assign wordline_reg[55:48] = dec_out;
+            3'h6: wordline_reg[55:48] = dec_out;
 
-            3'h7: assign wordline_reg[63:56] = dec_out;
+            3'h7: wordline_reg[63:56] = dec_out;
 
         endcase
 

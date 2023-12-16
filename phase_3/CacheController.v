@@ -23,7 +23,7 @@ module CacheController (
     wire iwrite0, iwrite1, dwrite0, dwrite1;
     wire iwrite_w0, iwrite_w1, dwrite_w0, dwrite_w1;
 
-    wire [15:0] mem_data;
+    wire [15:0] mem_data, mem_address;
     wire [15:0] miss_addr;
     wire [15:0] icache_data_in, dcache_data_in;
 
@@ -33,7 +33,7 @@ module CacheController (
     wire [7:0] icache_word_sel, dcache_word_sel;
 
     wire miss_detected, mem_data_vld;
-    wire multi_mem_enable;
+    wire multi_mem_enable, cache_enable;
 
     // iCache
     dff instr_tag_arr0[7:0] ( .clk(clk), .rst(rst), .wen(1'b1), .d(itag0_nxt), .q(itag0_curr));
@@ -94,8 +94,8 @@ module CacheController (
     assign icache_hit = !icache_miss && ( iwrite || iread );
     assign dcache_hit = !dcache_miss && ( dwrite || dread );
 
-    assign instruction_out = stall ? 0 : iwrite0 ? : icache_out0 : icache_out1;
-    assign data_out = stall ? 0 : dwrite0 ? : dcache_out0 : dcache_out1;
+    assign instruction_out = stall ? 0 : iwrite0 ? icache_out0 : icache_out1;
+    assign data_out = stall ? 0 : dwrite0 ? dcache_out0 : dcache_out1;
 
     // Output Signals //
 
