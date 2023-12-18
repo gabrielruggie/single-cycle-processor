@@ -9,6 +9,8 @@ module D_Cache(
 	input rst,
 	input write_en_0,
 	input write_en_1,
+	input data_wen,
+	input tag_wen,
 	input [15:0] data_in,	// data to write to cache
 	input [7:0]  tag_in_0, 	// tag of block we are looking for
 	input [7:0]  tag_in_1,
@@ -22,10 +24,10 @@ module D_Cache(
 );
 
 	// instantiate 2 data/metadata arrays for way 0 and way 1 to read from cache in one cycle
-	DataArray dataArray_0(.clk, .rst, .DataIn(data_in), .Write(write_en), .BlockEnable(block_en), .WordEnable(word), .DataOut(data_out_0));
-	DataArray dataArray_1(.clk, .rst, .DataIn(data_in), .Write(write_en), .BlockEnable(block_en), .WordEnable(word), .DataOut(data_out_1));
-	MetaDataArray metaDataArray_0(.clk, .rst, .DataIn(tag_in_0), .Write(write_en), .BlockEnable(block_en), .DataOut(tag_out_0));
-	MetaDataArray metaDataArray_1(.clk, .rst, .DataIn(tag_in_1), .Write(write_en), .BlockEnable(block_en), .DataOut(tag_out_1));
+	DataArray dataArray_0(.clk, .rst, .DataIn(data_in), .Write(write_en_0 && data_wen), .BlockEnable(block_en), .WordEnable(word), .DataOut(data_out_0));
+	DataArray dataArray_1(.clk, .rst, .DataIn(data_in), .Write(write_en && data_wen), .BlockEnable(block_en), .WordEnable(word), .DataOut(data_out_1));
+	MetaDataArray metaDataArray_0(.clk, .rst, .DataIn(tag_in_0), .Write(write_en && tag_wen), .BlockEnable(block_en), .DataOut(tag_out_0));
+	MetaDataArray metaDataArray_1(.clk, .rst, .DataIn(tag_in_1), .Write(write_en && tag_wen), .BlockEnable(block_en), .DataOut(tag_out_1));
 
 
 endmodule
