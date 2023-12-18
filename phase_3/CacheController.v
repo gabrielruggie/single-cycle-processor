@@ -40,14 +40,14 @@ module CacheController (
     dff instr_tag_arr1[7:0] ( .clk(clk), .rst(rst), .wen(1'b1), .d(itag1_nxt), .q(itag1_curr));
 	
 	I_Cache i_cache(.clk, .rst, .write_en_0(iwrite0 | write_tag_array), .write_en_1(iwrite1 | write_tag_array), .data_in(icache_data_in), .tag_in_0(itag0_curr), .tag_in_1(itag1_curr), 
-					.word(iword_sel), .block_en(iblock_sel), .data_out_0(icache_out0), .data_out_1(icache_out1));
+					.word(iword_sel), .block_en(iblock_sel), .data_out_0(icache_out0), .data_out_1(icache_out1), .tag_out_0(itag0_nxt), .tag_out_1(itag1_nxt));
 
     // dCache
     dff data_tag_arr0[7:0] ( .clk(clk), .rst(rst), .wen(1'b1), .d(dtag0_nxt), .q(dtag0_curr) );
     dff data_tag_arr1[7:0] ( .clk(clk), .rst(rst), .wen(1'b1), .d(dtag1_nxt), .q(dtag1_curr) );
 	
 	D_Cache d_cache(.clk, .rst, .write_en_0(iwrite0 | write_data_array), .write_en_1(iwrite1 | write_data_array), .data_in(dcache_data_in), .tag_in_0(dtag0_curr), .tag_in_1(dtag1_curr), 
-					.word(dword_sel), .block_en(dblock_sel), .data_out_0(dcache_out0), .data_out_1(dcache_out1));
+					.word(dword_sel), .block_en(dblock_sel), .data_out_0(dcache_out0), .data_out_1(dcache_out1), .tag_out_0(dtag0_nxt), .tag_out_1(dtag1_nxt));
 
     // Decoders to select correct block
     Decoder6to64 iblock ( .data_in(iaddress[9:4]), .wordline(iblock_sel) );
