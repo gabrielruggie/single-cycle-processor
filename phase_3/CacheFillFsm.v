@@ -27,14 +27,14 @@ module CacheFillFsm (
     dff state ( .clk(clk), .rst(rst), .q(curr_st), .d(nxt_st), .wen(1'b1) );
         assign nxt_st = fsm_busy_curr;
     dff busy ( .clk(clk), .rst(rst), .q(fsm_busy_curr), .d(fsm_busy_nxt), .wen(1'b1) );
-        assign fsm_busy_curr = curr_st ? full : miss_detected; 
+        assign fsm_busy_nxt = curr_st ? full : miss_detected; 
     
     assign full = curr_st && !(count_out == 4'b1011);
     
     cla_4bit inc_count ( .A(count_out), .B(4'b0001), .Sum(sum), .Cin(1'b0), .P(), .G() );
     cla_4bit inc_addr ( .A(addr_out), .B(4'b0001), .Sum(addr_in), .Cin(1'b0), .P(), .G() );
 
-    dff count [3:0] ( .clk(clk), .rst(rst_cntr0), .q(count_out), .d(count_in), .wen(nxt_st) );
+    dff count [3:0] ( .clk(clk), .rst(rst_cntr0), .q(count_out), .d(count_in), .wen({4{nxt_st}}) );
         assign rst_cntr0 = rst || count_out == 4'b1011;
         assign count_in = !curr_st ?  1'b1 : miss_detected ? sum : count_out;
 
