@@ -59,7 +59,7 @@ module CPU (
     // Fetch Stage
         // Fetch Stage Module
         FetchStage fetch ( .clk(clk), .rst(!rst_n), .branch_en(branch_en), .branch_pc(branch_pc),
-                           .curr_instr(curr_instr_f), .curr_pc_f, .cache_stall(!cache_stall) );
+                           .curr_instr(curr_instr_f), .curr_pc_f, .cache_stall(cache_stall) );
 
         // Pipe Line Register ( Enable comes from decode stage (stall) )
         FetchDecodeRegister if_id ( .clk(clk), .rst(!rst_n), .enable(!cache_stall), .flush, .curr_pc(curr_pc_f), .curr_instr(curr_instr_f), 
